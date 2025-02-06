@@ -1,0 +1,13 @@
+
+<!-- this main output hides all app content behind the authorization flow. -->
+{{ htmlTemplate("templates/navbar.html") }}
+<div class="invisible">{{ textInput(inputId="tab", label=NULL, value = "mtcars") }}</div> <!-- input to track the tab. -->
+<div class="h-full opensans text-gray-600" style="max-width: 2000px; margin: 0 auto;">
+    <main class="px-4 py-6">
+        <div>
+            {{ conditionalPanel("input.tab=='mtcars'", htmlTemplate("templates/mtcars.html")) }}
+            {{ conditionalPanel("input.tab=='states'", htmlTemplate("templates/states.html")) }}
+        </div>
+    </main>
+</div>
+{{ htmlTemplate("templates/note.html") }}

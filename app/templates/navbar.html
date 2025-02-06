@@ -7,12 +7,14 @@
                     <a href="#" onclick="setTab('states')" class="nav-link" data-tab="states">states</a>
                 </div>
             </div>
-            <div class="md:hidden">
-                <button type="button" onclick="toggleMenu()" class="text-white hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-white">
-                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-                    </svg>
-                </button>
+            <div class="flex items-center space-x-4">
+                <div class="md:hidden">
+                    <button type="button" onclick="toggleMenu()" class="text-white hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-white">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -20,6 +22,12 @@
         <div class="px-2 pt-2 pb-3 space-y-1">
             <a href="#" onclick="setTab('mtcars')" class="nav-link active" data-tab="mtcars">mtcars</a>
             <a href="#" onclick="setTab('states')" class="nav-link" data-tab="states">states</a>
+            <button onclick="logout()" class="block text-white bg-gray-700 px-4 py-2 rounded w-full text-left hover:bg-gray-600">Log Out</button>
+        </div>
+    </div>
+    <div class="absolute right-4 top-0">
+        <div class="flex items-center justify-between h-16">
+            <a href="#" onclick="logout()" class="nav-link active">Log Out</a>
         </div>
     </div>
 </nav>
@@ -45,19 +53,22 @@
 </style>
 
 <script>
-function toggleMenu() {
-    const menu = document.getElementById('mobile-menu');
-    menu.classList.toggle('hidden');
-}
+    function toggleMenu() {
+        const menu = document.getElementById('mobile-menu');
+        menu.classList.toggle('hidden');
+    }
 
-function setTab(value) {
-    const links = document.querySelectorAll('.nav-link');
-    links.forEach(link => {
-        link.classList.remove('active');
-        if(link.dataset.tab === value) {
-            link.classList.add('active');
-        }
-    });
-    Shiny.setInputValue('tab', value);
-}
+    function setTab(value) {
+        const links = document.querySelectorAll('.nav-link');
+        links.forEach(link => {
+            link.classList.remove('active');
+            if(link.dataset.tab === value) {
+                link.classList.add('active');
+            }
+        });
+        Shiny.setInputValue('tab', value);
+    }
+    function logout() {
+        firebase.auth().signOut();
+    }
 </script>

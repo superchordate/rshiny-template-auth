@@ -6,6 +6,10 @@ I'm an independent contractor providing flexible end-to-end analytics support fo
 
 https://www.brycechamberlainllc.com
 
+## Important Notes
+
+* Anything in the `app/www/` folder will be publicly accessible, so take care!
+
 ## What is Tailwind?
 
 Tailwind CSS is a utility-first framework that provides low-level utility classes to build designs directly in your HTML. 

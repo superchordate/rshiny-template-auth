@@ -1,24 +1,94 @@
 <!DOCTYPE html>
 <html>
+
   <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="A demo showcasing the integration of R Shiny with Tailwind CSS, demonstrating modern web development practices in R.">
+    <title>{{ app_title }}</title>    
     {{ headContent() }}
     {{ import_www() }}
-    <meta name="description" content="A demo showcasing the integration of R Shiny with Tailwind CSS, demonstrating modern web development practices in R.">
-    <title>{{ app_title }}</title>
+
+    <!-- firebase/identity provider initialization and persistence -->
+    <!-- https://console.cloud.google.com/customer-identity/providers > select provider > click APPLICATION SETUP DETAILS -->
+    <script src="https://www.gstatic.com/firebasejs/8.0/firebase.js"></script>
+    <script>
+
+      var config = {
+        apiKey: "{{ firebase_config$apiKey }}",
+        authDomain: "{{ firebase_config$authDomain }}",
+      };
+
+      firebase.initializeApp(config);
+              
+      // https://firebase.google.com/docs/auth/web/firebaseui
+      var uiConfig = {
+          callbacks: {
+              signInSuccessWithAuthResult: function(authResult, redirectUrl) {
+                  // send the token to the server for verification.
+                  console.log(authResult);
+                  Shiny.setInputValue('idToken', authResult.credential.idToken);
+                  return true;
+              },
+              uiShown: function() {
+                  // The widget is rendered.
+                  // Hide the loader.
+                  document.getElementById('loader').style.display = 'none';
+              }
+          },
+          // Will use popup for IDP Providers sign-in flow instead of the default, redirect.
+          signInFlow: 'popup',
+          signInSuccessUrl: '/',
+          signInOptions: [
+              // Leave the lines as is for the providers you want to offer your users.
+              firebase.auth.EmailAuthProvider.PROVIDER_ID,
+              firebase.auth.GoogleAuthProvider.PROVIDER_ID,
+              // firebase.auth.FacebookAuthProvider.PROVIDER_ID,
+              // firebase.auth.TwitterAuthProvider.PROVIDER_ID,
+              // firebase.auth.GithubAuthProvider.PROVIDER_ID,
+              // firebase.auth.PhoneAuthProvider.PROVIDER_ID
+          ],
+          // Terms of service url.
+          // tosUrl: '<your-tos-url>',
+          // Privacy policy url.
+          // privacyPolicyUrl: '<your-privacy-policy-url>'
+      };
+
+      firebase
+        .auth()
+        .setPersistence(firebase.auth.Auth.Persistence.LOCAL)
+        .then(() => {
+          firebase.auth().onAuthStateChanged((user) => {
+            if (user) {
+              user.getIdToken().then(function (idToken) {
+                document.getElementById('loader').style.display = 'none';
+                Shiny.setInputValue("idToken", idToken);
+              });
+            } else {
+              var ui = new firebaseui.auth.AuthUI(firebase.auth());
+              ui.start('#firebaseui-auth-container', uiConfig);
+              Shiny.setInputValue("idToken", "logout");
+          }})
+        })
+    </script>
+
+    <!-- firebase UI https://firebase.google.com/docs/auth/web/firebaseui -->
+    <script src="https://www.gstatic.com/firebasejs/ui/6.0.1/firebase-ui-auth.js"></script>
+    <link type="text/css" rel="stylesheet" href="https://www.gstatic.com/firebasejs/ui/6.0.1/firebase-ui-auth.css" />
+
   </head>
+
+  <!-- the user will see any hard-coded HTML below. you can use it to set up your logged-out UI -->
   <body style="background-color: #E3A4A5;">
-    {{ htmlTemplate("templates/navbar.html") }}
-    <div class="h-full opensans text-gray-600" style="max-width: 2000px; margin: 0 auto;">
-        <div class="invisible">{{ textInput(inputId="tab", label=NULL, value = "mtcars") }}</div> <!-- input to track the tab. -->
-        <main class="px-4 py-6">
-            <div>
-                {{ conditionalPanel("input.tab=='mtcars'", htmlTemplate("templates/mtcars.html")) }}
-                {{ conditionalPanel("input.tab=='states'", htmlTemplate("templates/states.html")) }}
-            </div>
-        </main>
-    </div>
-    {{ htmlTemplate("templates/note.html") }}
+
+    <!-- Firebase login UI stuff -->
+    <div class="hidden">{{ textInput(inputId="idToken", label="", value="") }}</div>
+    <div id="firebaseui-auth-container"></div>
+    <div class='w-full text-center m-6' id="loader">Loading...</div>
+
+    <!-- the "protected" output hides app content behind the authorization flow. -->
+    {{ uiOutput("protected") }}
+
   </body>
+  
 </html>

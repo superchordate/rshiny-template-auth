@@ -1,5 +1,8 @@
 require(shiny)
 require(magrittr) # for %<>%
+require(openssl) # for verifying tokens.
+require(jose)
+require(jsonlite)
 
 enableBookmarking(store = "url")
 
