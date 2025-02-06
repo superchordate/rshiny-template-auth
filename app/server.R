@@ -6,7 +6,7 @@ server = function(input, output, session) {
     if(is.null(input$idToken) || input$idToken == '') return()
 
     if(input$idToken == 'logout'){
-      user(NULL)
+      user('logout')
       return()
     }
     
@@ -57,7 +57,12 @@ server = function(input, output, session) {
   for(i in dofiles) source(i, local = TRUE)
   rm(i)
   
-  # this output hides all app content behind the authorization flow.
-  output$protected = renderUI({ if(!is.null(user())) { htmlTemplate("templates/protected.html") } })
+  # show login when logout condition applies.
+  output$login = renderUI({ if(!is.null(user()) && user() == 'logout') { htmlTemplate("templates/login.html") } })
 
+  # this output hides all app content behind the authorization flow.
+  output$protected = renderUI({
+    if(!is.null(user()) && is.list(user()) && !is.null(user()$email)){ 
+      htmlTemplate("templates/protected.html") 
+  }})
 }

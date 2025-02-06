@@ -12,67 +12,6 @@
     <!-- firebase/identity provider initialization and persistence -->
     <!-- https://console.cloud.google.com/customer-identity/providers > select provider > click APPLICATION SETUP DETAILS -->
     <script src="https://www.gstatic.com/firebasejs/8.0/firebase.js"></script>
-    <script>
-
-      var config = {
-        apiKey: "{{ firebase_config$apiKey }}",
-        authDomain: "{{ firebase_config$authDomain }}",
-      };
-
-      firebase.initializeApp(config);
-              
-      // https://firebase.google.com/docs/auth/web/firebaseui
-      var uiConfig = {
-          callbacks: {
-              signInSuccessWithAuthResult: function(authResult, redirectUrl) {
-                  // send the token to the server for verification.
-                  console.log(authResult);
-                  Shiny.setInputValue('idToken', authResult.credential.idToken);
-                  return true;
-              },
-              uiShown: function() {
-                  // The widget is rendered.
-                  // Hide the loader.
-                  document.getElementById('loader').style.display = 'none';
-              }
-          },
-          // Will use popup for IDP Providers sign-in flow instead of the default, redirect.
-          signInFlow: 'popup',
-          signInSuccessUrl: '/',
-          signInOptions: [
-              // Leave the lines as is for the providers you want to offer your users.
-              firebase.auth.EmailAuthProvider.PROVIDER_ID,
-              firebase.auth.GoogleAuthProvider.PROVIDER_ID,
-              // firebase.auth.FacebookAuthProvider.PROVIDER_ID,
-              // firebase.auth.TwitterAuthProvider.PROVIDER_ID,
-              // firebase.auth.GithubAuthProvider.PROVIDER_ID,
-              // firebase.auth.PhoneAuthProvider.PROVIDER_ID
-          ],
-          // Terms of service url.
-          // tosUrl: '<your-tos-url>',
-          // Privacy policy url.
-          // privacyPolicyUrl: '<your-privacy-policy-url>'
-      };
-
-      firebase
-        .auth()
-        .setPersistence(firebase.auth.Auth.Persistence.LOCAL)
-        .then(() => {
-          firebase.auth().onAuthStateChanged((user) => {
-            if (user) {
-              user.getIdToken().then(function (idToken) {
-                document.getElementById('loader').style.display = 'none';
-                document.getElementById('firebaseui-auth-container').style.display = 'none';                
-                Shiny.setInputValue("idToken", idToken);
-              });
-            } else {
-              var ui = new firebaseui.auth.AuthUI(firebase.auth());
-              ui.start('#firebaseui-auth-container', uiConfig);
-              Shiny.setInputValue("idToken", "logout");
-              document.getElementById('firebaseui-auth-container').style.display = 'block';     
-          }})
-        })
-    </script>
 
     <!-- firebase UI https://firebase.google.com/docs/auth/web/firebaseui -->
     <script src="https://www.gstatic.com/firebasejs/ui/6.0.1/firebase-ui-auth.js"></script>
@@ -83,14 +22,39 @@
   <!-- the user will see any hard-coded HTML below. you can use it to set up your logged-out UI -->
   <body style="background-color: #E3A4A5;">
 
-    <!-- Firebase login UI stuff -->
-    <div class="hidden">{{ textInput(inputId="idToken", label="", value="") }}</div>
-    <div id="firebaseui-auth-container" class="m-10"></div>
-    <div class='w-full text-center m-6' id="loader">Loading...</div>
+    <!-- Firebase login UI -->
+    <div class="hidden">{{ textInput(inputId="idToken", label="", value=NULL) }}</div>
+    {{ uiOutput("login") }}
 
     <!-- the "protected" output hides app content behind the authorization flow. -->
     {{ uiOutput("protected") }}
 
   </body>
+
+  <script>
+
+    var config = {
+      apiKey: "{{ firebase_config$apiKey }}",
+      authDomain: "{{ firebase_config$authDomain }}",
+    };
+
+    firebase.initializeApp(config);
+    var auth = firebase.auth();
+
+    auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
+      .then(() => {
+        auth.onAuthStateChanged((user) => {
+          console.log(user);
+          if (user) {
+            user.getIdToken().then(function (idToken) {
+              Shiny.setInputValue("idToken", idToken);
+            });
+          } else {
+            Shiny.setInputValue("idToken", "logout");
+        }})
+
+      })
+
+  </script>
   
 </html>
