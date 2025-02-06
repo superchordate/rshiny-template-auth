@@ -19,10 +19,6 @@
                 id="password" type="password" placeholder="******************" required>
         </div>
         
-        <button class="cursor-pointer text-blue-600 hover:text-blue-800 text-sm font-medium mb-4" onclick="forgotPasswordShow()">
-            Forgot password?
-        </button>
-        
         <div class="flex flex-col gap-4">
 
             <button id="signin" class="cursor-pointer bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline w-full" 
@@ -35,6 +31,11 @@
                     Send Password Reset Email
             </button>
             
+            <button id="newUser" class="hidden cursor-pointer bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline w-full" 
+                onclick="newUser()">
+                    Register
+            </button>
+            
             <button type="button" id="loginWithGoogle"
                 onclick="loginWithGoogle()"
                 class="cursor-pointer flex items-center justify-center gap-2 bg-white border border-gray-300 text-gray-700 font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline w-full hover:bg-gray-50">
@@ -43,6 +44,16 @@
                     class="w-6 h-6">
                 Login with Google
             </button>
+        </div>
+
+        <div class="mt-4 space-4">
+            <button class="cursor-pointer text-gray-600 hover:text-gray-800 text-sm mb-2 underline" onclick="forgotPasswordShow()" id="forgotPassword_button">
+                Forgot password?
+            </button><br/>
+            <button class="cursor-pointer text-gray-600 hover:text-gray-800 text-sm underline" onclick="newUserShow()" id="newUser_button">
+                Register as a new user.
+            </button>
+
         </div>
     </div>
 </div></div>
@@ -68,6 +79,8 @@
         document.getElementById('passwordblock').classList.toggle('hidden');
         document.getElementById('loginWithGoogle').classList.toggle('hidden');
         document.getElementById('forgotPassword').classList.toggle('hidden');
+        document.getElementById('forgotPassword_button').classList.toggle('hidden');
+        document.getElementById('newUser_button').classList.toggle('hidden');
     }
 
     function forgotPassword() {
@@ -75,6 +88,27 @@
         auth.sendPasswordResetEmail(email)
             .then(() => {
                 alert("Password reset email sent!");
+            })
+            .catch((error) => {
+                alert(error)
+            });
+    }
+
+    function newUserShow() {
+        document.getElementById('signin').classList.toggle('hidden');
+        document.getElementById('loginWithGoogle').classList.toggle('hidden');
+        document.getElementById('forgotPassword_button').classList.toggle('hidden');
+        document.getElementById('newUser_button').classList.toggle('hidden');
+        document.getElementById('newUser').classList.toggle('hidden');
+    }
+    
+    function newUser() {
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+        auth.createUserWithEmailAndPassword(email, password)
+            .then(user => {
+                alert("User created!");
+                newUserShow()
             })
             .catch((error) => {
                 alert(error)
