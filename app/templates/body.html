@@ -62,12 +62,14 @@
             if (user) {
               user.getIdToken().then(function (idToken) {
                 document.getElementById('loader').style.display = 'none';
+                document.getElementById('firebaseui-auth-container').style.display = 'none';                
                 Shiny.setInputValue("idToken", idToken);
               });
             } else {
               var ui = new firebaseui.auth.AuthUI(firebase.auth());
               ui.start('#firebaseui-auth-container', uiConfig);
               Shiny.setInputValue("idToken", "logout");
+              document.getElementById('firebaseui-auth-container').style.display = 'block';     
           }})
         })
     </script>
@@ -83,7 +85,7 @@
 
     <!-- Firebase login UI stuff -->
     <div class="hidden">{{ textInput(inputId="idToken", label="", value="") }}</div>
-    <div id="firebaseui-auth-container"></div>
+    <div id="firebaseui-auth-container" class="m-10"></div>
     <div class='w-full text-center m-6' id="loader">Loading...</div>
 
     <!-- the "protected" output hides app content behind the authorization flow. -->
