@@ -99,6 +99,16 @@ You are done setting up Identity Platform! Celebrate with a latte. :coffee:
 Then, continue by running the app in RStudio. You can now perform all the login operations (assuming you are one of the authorized Test Users)! 
 
 
+## On the Web
+
+_Disclaimer: I can't make any guarantees that the authorization here is 100% secure. We all must be responsible for our own security, so be sure to study up and review this code, or consult an expert, if you decide to use this template in production._
+
+When you move this to the web, you'll need to add the domain to https://console.cloud.google.com/customer-identity/providers > Settings > Security > Authorized Domains, and remove localhost and 127.0.0.1.
+
+I'm hoping this will work on just about any platform, since it runs entirely in R on the server and JS on the front-end. Both will be available on any platform that can run an R Shiny app. 
+
+
+
 ## Design Notes
 
 **Not a Package**
