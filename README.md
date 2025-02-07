@@ -37,7 +37,7 @@ To use this project:
 ## Identity Platform Setup
 
 * Initialize Project on Google Cloud Platform: Create a new project to make it easier to delete all the resources when you are finished testing.
-  - Follow the steps at https://developers.google.com/workspace/guides/create-project including setting up a billing account. Don't worry, you won't get charged until you hit 50,000 monthly active users^[1](https://cloud.google.com/identity-platform/pricing). You can set up [billing alerts](https://cloud.google.com/billing/docs/how-to/budgets) to be more sure you won't see high billing. 
+  - Follow the steps at https://developers.google.com/workspace/guides/create-project including setting up a billing account. Don't worry, you won't get charged until you hit 50,000 monthly active users<sup>[1](https://cloud.google.com/identity-platform/pricing)</sup>. You can set up [billing alerts](https://cloud.google.com/billing/docs/how-to/budgets) to be more sure you won't see high billing. 
   - Go to https://console.cloud.google.com/customer-identity/providers and click "Enable Identity Providers."
 
 * If you would like to allow users to log in with email (recommended): 
@@ -79,14 +79,16 @@ PUBLIC_FIREBASE_AUTH_DOMAIN=paste_domain_here
   - Go to https://console.cloud.google.com/customer-identity/providers and click "APPLICATION SETUP DETAILS" on the right. 
   - Copy the `apiKey` and `authDomain` to replace `paste_key_here` and `paste_domain_here`, respectively. Don't include any `'` or `"`.
 
-* Authorize the local R Shiny development domain. 
+* Authorize the local R Shiny development domain.
   - Run the app and note the URL. For me it is "http://127.0.0.1:4201/?".
   - Go to https://console.cloud.google.com/customer-identity/providers and click Settings (expand the left sidebar).
   - Click "Security". We need to authorize the domain part of this: 127.0.0.1.
   - Click 'ADD DOMAIN", enter "127.0.0.1" (or the value you see) and "SAVE."
-  - If you are using Sign In with Google: We also need to add it to the Oauth client's Authorized redirect URIs. Go to https://console.cloud.google.com/apis/credentials and select your Oauth client. 
-  - Under "Authorized redirect URIs", click "+ ADD URI."
-  - Enter "http://127.0.0.1" (or the value you see) and click "SAVE".
+
+* Authorize the Oauth client for your Firebase app. Only necessary if you are using Sign In with Google.
+  - Go to https://console.cloud.google.com/apis/credentials and select your Oauth client. 
+  - Under "Authorized redirect URIs", click "+ ADD URI".
+  - Enter your the auth handler URL for you `authDomain`. Take `https://authDomain/__/auth/handler` and replace "authDomain" with your `authDomain`.
 
 If you aren't using email, or aren't using Log In with Google, set the appropriate value to `FALSE` at `app/server.R` line 4. 
 

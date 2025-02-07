@@ -6,7 +6,7 @@ require(jsonlite)
 
 # app settings. 
 app_title = 'R Shiny + Auth'
-auth_methods = list(email = FALSE, google = TRUE)
+auth_methods = list(email = TRUE, google = TRUE)
 
 enableBookmarking(store = "url")
 readRenviron('.env')
