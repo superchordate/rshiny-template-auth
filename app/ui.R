@@ -3,6 +3,7 @@ ui = function(...){
     'templates/body.html', 
     app_title = app_title, 
     firebase_config = list(apiKey = Sys.getenv("PUBLIC_FIREBASE_API_KEY"), authDomain = Sys.getenv("PUBLIC_FIREBASE_AUTH_DOMAIN")),
+    auth_methods = auth_methods,
     import_www = function(){
 
       ihead = list(

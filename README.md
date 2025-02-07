@@ -99,6 +99,33 @@ You are done setting up Identity Platform! Celebrate with a latte. :coffee:
 Then, continue by running the app in RStudio. You can now perform all the login operations (assuming you are one of the authorized Test Users)! 
 
 
+## reCAPTCHA Setup
+
+You may want to use reCAPTCHA to prevent bots from creating accounts. You can add an invisible check to verify users without any extra clicks. It requires some extra setup though.
+
+This verification is free for up to 10,000 assessments per organization, and super cheap after that.<sup>[2](https://cloud.google.com/security/products/recaptcha?pricing&hl=en#pricing)</sup> 
+
+_These steps haven't been fully vetted by me so you might need some troubleshooting. If you do run into problems, please submit a PR to fix the instructions._ 
+
+After following Identity Provider setup steps:
+
+* Enable reCAPTCHA: 
+  - Go to https://console.cloud.google.com/security/recaptcha and click "Enable reCAPTCHA".
+  - Click "+ Create Key"
+  - Go through creation steps. 
+  - Add the ID to `.env` as `PUBLIC_RECAPTCHA_SITE_KEY`.
+
+* Create a Google API Key for the server to access your project's reCAPTCHA. 
+  - Go to https://console.cloud.google.com/apis/credentials
+  - Click Create Credentials, select API Key, click ... to the right of you new key, select Edit API Key
+  - Set Name = "recaptcha", Restrict Key = reCAPTCHA Enterprise API
+  - Click Show key, copy into `.env` as `RECAPTCHA_API_KEY`
+  - Click Close and Save
+
+* In global.R, set `invisible_recaptcha = TRUE`.
+
+* This may require extra setup when publishing to the web. The server must be authenticated with reCAPTCHA and your google project. I expect this will be automatic if using Google Cloud Run on the same project, but it might be tricky on other publishing platforms. See https://cloud.google.com/recaptcha/docs/authentication for more information. 
+
 ## On the Web
 
 _Disclaimer: I can't make any guarantees that the authorization here is 100% secure. We all must be responsible for our own security, so be sure to study up and review this code, or consult an expert, if you decide to use this template in production._

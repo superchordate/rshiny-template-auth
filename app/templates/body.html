@@ -14,13 +14,21 @@
     <script src="https://www.gstatic.com/firebasejs/8.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.0/firebase-auth.js"></script>
 
+    <!-- https://developers.google.com/recaptcha/docs/v3 -->
+    {{if(auth_methods$invisible_recaptcha) HTML(paste0('<script src="https://www.google.com/recaptcha/enterprise.js?render=', Sys.getenv('PUBLIC_RECAPTCHA_SITE_KEY'), '"></script>')) }}
+
   </head>
 
   <!-- the user will see any hard-coded HTML below. you can use it to set up your logged-out UI -->
   <body style="background-color: #E3A4A5;">
 
+    <!-- hidden inputs to set initial values. -->
+    <div class="hidden">{{ tagList(
+      textInput(inputId="idToken", label="", value=NULL), 
+      textInput(inputId="recaptcha_token", label="", value=NULL)) 
+    }}</div>
+
     <!-- Firebase login UI -->
-    <div class="hidden">{{ textInput(inputId="idToken", label="", value=NULL) }}</div>
     {{ uiOutput("login") }}
 
     <!-- the "protected" output hides app content behind the authorization flow. -->
@@ -30,13 +38,13 @@
 
   <script>
 
-    var config = {
+    const config = {
       apiKey: "{{ firebase_config$apiKey }}",
       authDomain: "{{ firebase_config$authDomain }}",
     };
 
     firebase.initializeApp(config);
-    var auth = firebase.auth();
+    const auth = firebase.auth();
 
     auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
       .then(() => {

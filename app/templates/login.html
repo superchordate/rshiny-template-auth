@@ -57,7 +57,7 @@
                 <button class="cursor-pointer text-gray-600 hover:text-gray-800 text-sm mb-2 underline" onclick="forgotPasswordShow()" id="forgotPassword_button">
                     Forgot password?
                 </button><br/>', if(auth_methods$allow_register_new_user) '
-                <button class="cursor-pointer text-gray-600 hover:text-gray-800 text-sm underline" onclick="newUserShow()" id="newUser_button">
+                <button class="cursor-pointer text-gray-600 hover:text-gray-800 text-sm underline" onclick="recaptcha()" id="newUser_button">
                     Register as a new user.
                 </button>', '
             </div>
@@ -66,6 +66,32 @@
 </div></div>
 
 <script>
+
+    function recaptcha(){
+
+        // if recaptcha is not enabled, pass a dummy value to continue the registration flow. 
+        {{ if(!auth_methods$invisible_recaptcha) HTML('Shiny.setInputValue("recaptcha_token", "dummy"); return;') }}
+        
+        grecaptcha.enterprise.ready(async () => {
+            try {
+                const token = await grecaptcha.enterprise.execute('{{ Sys.getenv("PUBLIC_RECAPTCHA_SITE_KEY") }}', {action: 'REGISTER'});
+                Shiny.setInputValue("recaptcha_token", token);
+            } catch (error) {
+                alert('Failed reCAPTCHA');
+            }
+        });
+    }
+
+    let recaptcha_passed = false;
+    Shiny.addCustomMessageHandler('recaptcha_score', function(score) {
+        if(score > 0.75) {
+            recaptcha_passed = true;
+            newUserShow();
+        } else {
+            alert('Failed reCAPTCHA');
+        }
+    });
+
     function loginWithEmailPassword() {
 
         const email = document.getElementById('email').value;
@@ -110,6 +136,10 @@
     }
     
     function newUser() {
+        if(!recaptcha_passed){ 
+            alert("reCAPTCHA not passed!");
+            return; 
+        }
         const email = document.getElementById('email').value;
         const password = document.getElementById('password').value;
         auth.createUserWithEmailAndPassword(email, password)
