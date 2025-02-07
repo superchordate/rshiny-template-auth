@@ -6,27 +6,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="A demo showcasing the integration of R Shiny with Tailwind CSS, demonstrating modern web development practices in R.">
     <title>{{ app_title }}</title>    
+    
     {{ headContent() }}
     {{ import_www() }}
-
-    <!-- firebase/identity provider initialization and persistence -->
-    <!-- https://console.cloud.google.com/customer-identity/providers > select provider > click APPLICATION SETUP DETAILS -->
-    <script src="https://www.gstatic.com/firebasejs/8.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.0/firebase-auth.js"></script>
-
-    <!-- https://developers.google.com/recaptcha/docs/v3 -->
-    {{if(auth_methods$invisible_recaptcha) HTML(paste0('<script src="https://www.google.com/recaptcha/enterprise.js?render=', Sys.getenv('PUBLIC_RECAPTCHA_SITE_KEY'), '"></script>')) }}
 
   </head>
 
   <!-- the user will see any hard-coded HTML below. you can use it to set up your logged-out UI -->
   <body style="background-color: #E3A4A5;">
-
-    <!-- hidden inputs to set initial values. -->
-    <div class="hidden">{{ tagList(
-      textInput(inputId="idToken", label="", value=NULL), 
-      textInput(inputId="recaptcha_token", label="", value=NULL)) 
-    }}</div>
 
     <!-- Firebase login UI -->
     {{ uiOutput("login") }}
@@ -36,29 +23,64 @@
 
   </body>
 
-  <script>
+    <!-- firebase/identity provider initialization and persistence -->
+    <!-- https://firebase.google.com/docs/web/alt-setup -->
+    <!-- latest version requires importing as a module, this adds some complexity
+           in particular, you need to add vars to window to make them available as click actions and to other templates.
+           for example, instead of `var = "value"` you would use `window.var = "value"`
+     -->
+    <script type="module">
 
-    const config = {
-      apiKey: "{{ firebase_config$apiKey }}",
-      authDomain: "{{ firebase_config$authDomain }}",
-    };
+      import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.2.0/firebase-app.js'
+      import { getAuth, browserLocalPersistence } from 'https://www.gstatic.com/firebasejs/11.2.0/firebase-auth.js'
+      import { ReCaptchaEnterpriseProvider } from 'https://www.gstatic.com/firebasejs/11.2.0/firebase-app-check.js'
 
-    firebase.initializeApp(config);
-    const auth = firebase.auth();
+      const config = {
+        apiKey: "{{ firebase_config$apiKey }}",
+        authDomain: "{{ firebase_config$authDomain }}",
+      };
 
-    auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
-      .then(() => {
-        auth.onAuthStateChanged((user) => {
-          if (user) {
-            user.getIdToken().then(function (idToken) {
-              Shiny.setInputValue("idToken", idToken);
-            });
+      window.app = initializeApp(config);
+      window.auth = getAuth(app);
+      window.recap_provider = new ReCaptchaEnterpriseProvider('{{ Sys.getenv("PUBLIC_RECAPTCHA_SITE_KEY") }}')
+      
+      window.user = null; // will need to persist this for mfa.
+
+      auth.setPersistence(browserLocalPersistence)
+        .then(() => {
+          auth.onAuthStateChanged((iuser) => {
+            if (iuser) {
+              iuser.getIdToken().then(function (idToken) {
+                Shiny.setInputValue("idToken", idToken);
+                window.user = iuser;
+              });
+            } else {
+              Shiny.setInputValue("idToken", "logout");
+          }})
+
+        })
+
+
+      // putting all handlers in body to prevent them running multiple times. 
+      let recaptcha_passed = false;
+      Shiny.addCustomMessageHandler('recaptcha_score', function(score) {
+          if(score > 0.75) {
+              recaptcha_passed = true;
+              newUserShow();
           } else {
-            Shiny.setInputValue("idToken", "logout");
-        }})
+              alert('Failed reCAPTCHA');
+          }
+      });
+      // Shiny.addCustomMessageHandler('verified_user', function(true_false) {
+      //     if(true_false == true && document.getElementById('mfa_phone_block')){              
+      //         document.getElementById('mfa_phone_block').classList.toggle('hidden');
+      //         document.getElementById('email_password_block').classList.toggle('hidden');
+      //         document.getElementById('loginWithGoogle').classList.toggle('hidden'); 
+      //         document.getElementById('forgot_register_block').classList.toggle('hidden'); 
+      //         document.getElementById('signin').classList.toggle('hidden');
+      //     }
+      // });
 
-      })
-
-  </script>
+    </script>
   
 </html>

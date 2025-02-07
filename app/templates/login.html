@@ -1,23 +1,52 @@
 <!-- Claude helped me build this! -->
-<div class="w-full pt-12 flex justify-center"><div class="bg-white p-8 rounded-lg shadow-md w-96">
+<div id="login_template" class="w-full pt-12 flex justify-center"><div class="bg-white p-8 rounded-lg shadow-md w-96">
     <h2 class="text-2xl font-bold mb-6 text-center text-gray-800">Login</h2>
     
     <div>
         {{if(auth_methods$email) HTML('
-            <div class="mb-4">
-                <label class="block text-gray-700 text-sm font-bold mb-2" for="email">
-                    Email
+            <div id="email_password_block" class="">
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2" for="email">
+                        Email
+                    </label>
+                    <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" 
+                        id="email" type="text" placeholder="your@email.com" required>
+                </div>
+                
+                <div id="passwordblock" class="mb-6">
+                    <label class="block text-gray-700 text-sm font-bold mb-2" for="password">
+                        Password
+                    </label>
+                    <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline" 
+                        id="password" type="password" placeholder="*****************" required>
+                </div>
+            </div>
+        ')}}
+
+        {{if(auth_methods$email_mfa_sms) HTML('
+            <div id="mfa_phone_block" class="hidden mb-4">
+                <label class="block text-gray-700 text-sm font-bold mb-2" for="mfa_phone">
+                    Phone Number
                 </label>
                 <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" 
-                    id="email" type="text" placeholder="your@email.com" required>
+                    id="mfa_phone" type="text" placeholder="">
+                <p class="text-sm italic mt-1 mb-8">Only used for Two-Factor Authentication</p>
+                <button id="sendMfaCode" class="cursor-pointer bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline w-full" 
+                    onclick="sendMfaCode()">
+                    Send Code
+                </button>
             </div>
-            
-            <div id="passwordblock" class="mb-6">
-                <label class="block text-gray-700 text-sm font-bold mb-2" for="password">
-                    Password
-                </label>
-                <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline" 
-                    id="password" type="password" placeholder="*****************" required>
+
+            <div id="mfa_code_block" class="hidden mb-4">                
+                <label class="text-gray-700 text-sm font-bold mb-2" for="mfa_code">
+                    Verification Code
+                </label>                
+                <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" 
+                    id="mfa_code" type="text" placeholder="">
+                <button id="submitMfaCode" class="mt-6 cursor-pointer bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline w-full" 
+                    onclick="submitMfaCode()">
+                    Submit
+                </button>
             </div>
         ')}}
         
@@ -33,7 +62,7 @@
                     onclick="forgotPassword()">
                         Send Password Reset Email
                 </button>
-                
+                                
                 <button id="newUser" class="hidden cursor-pointer bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline w-full" 
                     onclick="newUser()">
                         Register
@@ -53,7 +82,7 @@
         </div>
 
         {{if(auth_methods$email) HTML(paste0('
-            <div class="mt-4 space-4">
+            <div id="forgot_register_block" class="mt-4 space-4">
                 <button class="cursor-pointer text-gray-600 hover:text-gray-800 text-sm mb-2 underline" onclick="forgotPasswordShow()" id="forgotPassword_button">
                     Forgot password?
                 </button><br/>', if(auth_methods$allow_register_new_user) '
@@ -63,16 +92,125 @@
             </div>
         '))}}
     </div>
+
+    <div id="recaptcha-container"></div>
+
 </div></div>
 
-<script>
+<script type="module">
 
+    import { 
+        getAuth, RecaptchaVerifier, multiFactor, PhoneAuthProvider, createUserWithEmailAndPassword , signInWithEmailAndPassword ,
+        PhoneMultiFactorGenerator, getMultiFactorResolver, GoogleAuthProvider, signInWithPopup
+    } from 'https://www.gstatic.com/firebasejs/11.2.0/firebase-auth.js'
+
+    window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {'size': 'invisible'});
+
+    window.sendMfaCode = async () => {
+
+        // if there is a resolver, we don't have a user yet. 
+        if(window.resolver){
+
+            const phoneInfoOptions = {
+                multiFactorHint: window.resolver.hints[0], // there is only one MFA right now. see https://firebase.google.com/docs/auth/web/multi-factor#web_26 to select from multiple.
+                session: window.resolver.session
+            };
+
+            // Send SMS verification code.
+            const phoneAuthProvider = new PhoneAuthProvider(auth);
+            phoneAuthProvider.verifyPhoneNumber(phoneInfoOptions, recaptchaVerifier)
+                .then(function (verificationId) {
+                    window.mfa_verificationId = verificationId;
+                    document.getElementById('mfa_code_block').classList.toggle('hidden');
+                    document.getElementById('mfa_phone_block').classList.toggle('hidden');
+                });
+
+        } else {
+        
+            multiFactor(user).getSession().then(function (multiFactorSession) {
+                
+                const phoneInfoOptions = {
+                    phoneNumber: document.getElementById('mfa_phone').value,
+                    session: multiFactorSession
+                };
+
+                const phoneAuthProvider = new PhoneAuthProvider(window.auth);
+
+                phoneAuthProvider.verifyPhoneNumber(phoneInfoOptions, window.recaptchaVerifier)
+
+                    .then(function (verificationId) {
+                        window.mfa_verificationId = verificationId;
+                        document.getElementById('mfa_code_block').classList.toggle('hidden');
+                        document.getElementById('mfa_phone_block').classList.toggle('hidden');
+                    })
+                    .catch(error => {
+                        recaptchaVerifier.clear();
+                        if (error.code === "auth/requires-recent-login") {
+                            alert("reCAPTCHA needs a recent authentication. Please reauthenticate.");
+                            auth.signOut();
+                            window.location.reload();
+                        } else if(error.code === 'auth/second-factor-already-in-use'){
+                            // this means we accidentally followed the enroll flow. 
+                            // log out and try again. 
+                            alert("This account already has multi-factor authentication enabled. Something went wrong, sorry! Please try again.");
+                            auth.signOut();
+                            window.location.reload();
+                        } else {
+                            console.log(error);
+                        }
+                    });
+            });
+
+        }
+
+    }
+
+    // https://firebase.google.com/docs/auth/web/multi-factor#web_26
+    window.submitMfaCode = async () => {
+
+        const mfa_code = document.getElementById('mfa_code').value;
+        const cred = PhoneAuthProvider.credential(window.mfa_verificationId, mfa_code);
+        const multiFactorAssertion = PhoneMultiFactorGenerator.assertion(cred);
+
+        // if there is a resolver, resolve it.
+        if(window.resolver){
+
+            // Complete sign-in. This will also trigger the Auth state listeners.
+            window.resolver.resolveSignIn(multiFactorAssertion)
+                .then(function (userCredential) {
+                    // userCredential will also contain the user, additionalUserInfo, optional
+                    // credential (null for email/password) associated with the first factor sign-in.
+                    // For example, if the user signed in with Google as a first factor,
+                    // userCredential.additionalUserInfo will contain data related to Google
+                    // provider that the user signed in with.
+                    // - user.credential contains the Google OAuth credential.
+                    // - user.credential.accessToken contains the Google OAuth access token.
+                    // - user.credential.idToken contains the Google OAuth ID token.
+                    // Shiny.setInputValue('mfa_verification', userCredential);
+                });
+
+        // otherwise, this is a new enrollment.
+        } else {
+
+            return multiFactor(user).enroll(multiFactorAssertion).then(() => {
+                Shiny.setInputValue('mfa_verification', {mfa_verificationId: window.mfa_verificationId, mfa_code: mfa_code})
+            }).catch((error) => {
+                // recaptchaVerifier.clear();
+                console.log(error);
+                alert("Verification failed. Please try again.")
+            });
+
+        }
+
+    }
+
+    // TODO: try this without the ID using RecaptchaVerifier
     function recaptcha(){
 
         // if recaptcha is not enabled, pass a dummy value to continue the registration flow. 
         {{ if(!auth_methods$invisible_recaptcha) HTML('Shiny.setInputValue("recaptcha_token", "dummy"); return;') }}
         
-        grecaptcha.enterprise.ready(async () => {
+        window.recap_provider.ready(async () => {
             try {
                 const token = await grecaptcha.enterprise.execute('{{ Sys.getenv("PUBLIC_RECAPTCHA_SITE_KEY") }}', {action: 'REGISTER'});
                 Shiny.setInputValue("recaptcha_token", token);
@@ -80,31 +218,53 @@
                 alert('Failed reCAPTCHA');
             }
         });
+
     }
 
-    let recaptcha_passed = false;
-    Shiny.addCustomMessageHandler('recaptcha_score', function(score) {
-        if(score > 0.75) {
-            recaptcha_passed = true;
-            newUserShow();
-        } else {
-            alert('Failed reCAPTCHA');
-        }
-    });
-
-    function loginWithEmailPassword() {
+    window.loginWithEmailPassword = function () {
 
         const email = document.getElementById('email').value;
         const password = document.getElementById('password').value;
   
-        auth.signInWithEmailAndPassword(email, password)
+        signInWithEmailAndPassword(auth, email, password)
             .catch((error) => {
-                console.log(error)
-            });
+                if (error.code == 'auth/multi-factor-auth-required') {
+
+                    // The user is a multi-factor user. Second factor challenge is required.
+                    window.resolver = getMultiFactorResolver(auth, error);
+
+                    // show the phone input.
+                    document.getElementById('email_password_block').classList.toggle('hidden');
+                    document.getElementById('mfa_phone_block').classList.toggle('hidden');
+                    document.getElementById('signin').classList.toggle('hidden');
+                    document.getElementById('loginWithGoogle').classList.toggle('hidden');
+                    document.getElementById('forgot_register_block').classList.toggle('hidden');
+
+                } else {
+                    console.log(error)
+        }});
+
     }
 
-    function loginWithGoogle() {        
-        auth.signInWithPopup(new firebase.auth.GoogleAuthProvider());
+    window.loginWithGoogle = function() {        
+        signInWithPopup(auth, new GoogleAuthProvider())
+        .catch(error => {
+            if (error.code == 'auth/multi-factor-auth-required') {
+                    
+                // The user is a multi-factor user. Second factor challenge is required.
+                window.resolver = getMultiFactorResolver(auth, error);
+
+                // show the phone input.
+                document.getElementById('email_password_block').classList.toggle('hidden');
+                document.getElementById('mfa_phone_block').classList.toggle('hidden');
+                document.getElementById('signin').classList.toggle('hidden');
+                document.getElementById('loginWithGoogle').classList.toggle('hidden');
+                document.getElementById('forgot_register_block').classList.toggle('hidden');
+                
+            } else {
+                console.log(error)
+            }
+        });
     }
 
     function forgotPasswordShow(){
@@ -151,4 +311,5 @@
                 alert(error)
             });
     }
+
 </script>

@@ -1,7 +1,7 @@
 # this file is used to manage bookmarking in the app.
 
 # clean up the bookmark URL by excluding values we don't need to save. 
-exclude_from_bookmark = c('sidebarCollapsed', 'sidebar_reset', 'idToken')
+exclude_from_bookmark = c('sidebarCollapsed', 'sidebar_reset', 'idToken', 'recaptcha_token')
 
 # observer to update the bookmark URL when inputs change.
 observe({

@@ -1,16 +1,15 @@
 # user verification.
-user = reactiveVal(NULL)
-observeEvent(input$idToken, {
+authorized = reactiveVal(NULL)
 
-    if(is.null(input$idToken) || input$idToken == '') return()
+verify_idToken = function(idToken){
 
-    if(input$idToken == 'logout'){
-        user('logout')
+    if(idToken == 'logout'){
+        authorized(FALSE)
         return()
     }
 
     # extract information from token. 
-    header = jwt_split(input$idToken)$header
+    header = jwt_split(idToken)$header
 
     # verify the token using the Firebase public key.
     certs = fromJSON('https://www.googleapis.com/robot/v1/metadata/x509/securetoken@system.gserviceaccount.com')
@@ -20,29 +19,56 @@ observeEvent(input$idToken, {
     # validate the results. 
     if(header$alg != 'RS256'){
         warning('Wrong algorithm.')
-        user('logout')
+        authorized(FALSE)
         return()
     }
 
     if(is.null(public_key)){
         warning("Invalid key ID in token.")
-        user('logout')
+        authorized(FALSE)
         return()
     }
 
     # get the decoded/validated information. 
-    verified_token = jwt_decode_sig(input$idToken, pubkey = public_key)
+    verified_token = jwt_decode_sig(idToken, pubkey = public_key)
     exp = as.POSIXct(verified_token$exp, origin = "1970-01-01", tz = "UTC")
 
     if(exp < Sys.time()){
         warning('Expired token.')
-        user('logout')
+        authorized(FALSE)
         return()
     }
 
-    user(list(email = verified_token$email))
+    return(list(email = verified_token$email))
+
+}
+
+observeEvent(input$idToken, {
+
+    verified_user = verify_idToken(input$idToken)
+
+    if(!is.null(verified_user) && !is.null(verified_user$email)){
+        # session$sendCustomMessage('verified_user', TRUE)
+        authorized(TRUE)
+    } else {
+        authorized(FALSE)
+    }
 
 })
+
+# observeEvent(input$mfa_verification, {
+  
+#     verified_user_mfa = verify_idToken(input$mfa_verification$`_tokenResponse`$idToken)
+    
+#     #TODO how to verify MFA on server. 
+
+#     if(!is.null(verified_user_mfa) && !is.null(verified_user_mfa$email)){
+#         authorized(TRUE)
+#     } else {
+#         authorized(FALSE)
+#     }
+
+# })
 
 # reCAPTCHA verification.
 # this is triggered when the user clicks "Register as New User".

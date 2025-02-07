@@ -128,6 +128,20 @@ After following Identity Provider setup steps:
 
 * This may require extra setup when publishing to the web. The server must be authenticated with reCAPTCHA and your google project. I expect this will be automatic if using Google Cloud Run on the same project, but it might be tricky on other publishing platforms. See https://cloud.google.com/recaptcha/docs/authentication for more information. 
 
+TODO: these steps may not be necessary when importing directly. 
+
+## Multi-Factor Authentication
+
+Ultimately, passwords aren't enough to protect sensitive data<sup>[4](https://techcommunity.microsoft.com/blog/microsoft-entra-blog/your-paword-doesnt-matter/731984)</sup>. It is smart to also require MFA on your accounts.
+
+This template makes it easy to add multi-factor authentication via SMS. Full instructions from Google are at https://cloud.google.com/identity-platform/docs/web/mfa.
+
+* MFA requires reCAPTCHA, so follow steps for reCAPTCHA Setup above. 
+* Go to https://console.cloud.google.com/customer-identity/mfa and click "ENABLE".
+* Add your phone number under "Phone numbers for testing (optional)"
+* Go to https://console.firebase.google.com/ > Build > Authentication > Settings > SMS region policy > Allow United States > Save. 
+
+
 ## On the Web
 
 _Disclaimer: I can't make any guarantees that the authorization here is 100% secure. We all must be responsible for our own security, so be sure to study up and review this code, or consult an expert, if you decide to use this template in production._
@@ -136,6 +150,7 @@ When you move this to the web, you'll need to add the domain to https://console.
 
 I'm hoping this will work on just about any platform, since it runs entirely in R on the server and JS on the front-end. Both will be available on any platform that can run an R Shiny app. 
 
+On the web, you'll be gathering sensitive data like email and phone numbers for MFA. You should have a Privacy Policy and Terms of Service set up. You can add this information to your Google Cloud project at https://console.cloud.google.com/auth/branding.
 
 
 ## Design Notes
