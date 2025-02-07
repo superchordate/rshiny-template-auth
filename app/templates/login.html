@@ -52,16 +52,16 @@
             ')}}
         </div>
 
-        {{if(auth_methods$email) HTML('
+        {{if(auth_methods$email) HTML(paste0('
             <div class="mt-4 space-4">
                 <button class="cursor-pointer text-gray-600 hover:text-gray-800 text-sm mb-2 underline" onclick="forgotPasswordShow()" id="forgotPassword_button">
                     Forgot password?
-                </button><br/>
+                </button><br/>', if(auth_methods$allow_register_new_user) '
                 <button class="cursor-pointer text-gray-600 hover:text-gray-800 text-sm underline" onclick="newUserShow()" id="newUser_button">
                     Register as a new user.
-                </button>
+                </button>', '
             </div>
-        ')}}
+        '))}}
     </div>
 </div></div>
 

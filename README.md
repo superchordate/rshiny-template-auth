@@ -94,7 +94,7 @@ If you aren't using email, or aren't using Log In with Google, set the appropria
 
 You are done setting up Identity Platform! Celebrate with a latte. :coffee:
 
-Then, continue by running the app in RStudio. 
+Then, continue by running the app in RStudio. You can now perform all the login operations (assuming you are one of the authorized Test Users)! 
 
 
 ## Design Notes
