@@ -58,7 +58,7 @@ server = function(input, output, session) {
   rm(i)
   
   # show login when logout condition applies.
-  output$login = renderUI({ if(!is.null(user()) && user() == 'logout') { htmlTemplate("templates/login.html") } })
+  output$login = renderUI({ if(!is.null(user()) && user() == 'logout') { htmlTemplate("templates/login.html", auth_methods = auth_methods) } })
 
   # this output hides all app content behind the authorization flow.
   output$protected = renderUI({

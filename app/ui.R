@@ -1,11 +1,4 @@
-# app settings.
-# best put here so shiny knows to reload when they change (changes to global.R won't trigger reloads).
-app_title = 'R Shiny + Auth'
-
 ui = function(...){
-
-  readRenviron('.Renviron')
-
   htmlTemplate(
     'templates/body.html', 
     app_title = app_title, 

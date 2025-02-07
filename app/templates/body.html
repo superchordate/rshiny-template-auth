@@ -44,7 +44,6 @@
     auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
       .then(() => {
         auth.onAuthStateChanged((user) => {
-          console.log(user);
           if (user) {
             user.getIdToken().then(function (idToken) {
               Shiny.setInputValue("idToken", idToken);
