@@ -101,11 +101,13 @@ Then, continue by running the app in RStudio. You can now perform all the login 
 
 ## reCAPTCHA Setup
 
-You may want to use reCAPTCHA to prevent bots from creating accounts. You can add an invisible check to verify users without any extra clicks. It requires some extra setup though.
+You may want to use reCAPTCHA to prevent bots from creating accounts. You can add an invisible check to verify users without any extra clicks. It requires some setup though.
 
-This verification is free for up to 10,000 assessments per organization, and super cheap after that.<sup>[2](https://cloud.google.com/security/products/recaptcha?pricing&hl=en#pricing)</sup> 
+This verification is free for up to 10,000 assessments per organization, and super cheap after that.<sup>[2](https://cloud.google.com/security/products/recaptcha?pricing&hl=en#pricing)</sup> You can be alerted if the reCAPTCHA starts getting hit excessively. See [this forum post](https://stackoverflow.com/questions/78450805/monitoring-and-alerts-configuration-for-google-recaptcha-v3-enterprise-edition).
 
-_These steps haven't been fully vetted by me so you might need some troubleshooting. If you do run into problems, please submit a PR to fix the instructions._ 
+I've implemented a relatively simple check during user registration. A future enhancement may include checks at every login. There are a lot of different ways this can be used. See https://cloud.google.com/recaptcha/docs/best-practices-oat for a fairly comprehensive list of defense strategies. 
+
+_These steps haven't been fully vetted by me so you might need some troubleshooting. If you run into problems, please submit a PR to fix the instructions._ 
 
 After following Identity Provider setup steps:
 
