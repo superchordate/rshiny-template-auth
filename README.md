@@ -33,6 +33,7 @@ To use this project:
 * Set up Identity Platform (see below).
 * Run the app in RStudio.
 
+![Screenshot of the app](https://github.com/superchordate/rshiny-template-auth/blob/main/img/screen.jpg)
 
 ## Identity Platform Setup
 
