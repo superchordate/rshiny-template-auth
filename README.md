@@ -39,11 +39,12 @@ To use this project:
 
 * Initialize Project on Google Cloud Platform: Create a new project to make it easier to delete all the resources when you are finished testing.
   - Follow the steps at https://developers.google.com/workspace/guides/create-project including setting up a billing account. Don't worry, you won't get charged until you hit 50,000 monthly active users<sup>[1](https://cloud.google.com/identity-platform/pricing)</sup>. You can set up [billing alerts](https://cloud.google.com/billing/docs/how-to/budgets) to be more sure you won't see high billing. 
-  - Go to https://console.cloud.google.com/customer-identity/providers and click "Enable Identity Providers."
+  - Go to https://console.cloud.google.com/customer-identity/providers and click "Enable Identity Platform."
 
-* If you would like to allow users to log in with email (recommended): 
-  - Go to https://console.cloud.google.com/customer-identity/providers and click "ADD A PROVIDER."
-  - Select "Email / Password" and click "Enabled" and "Save."
+If you would like to allow users to log in with email (recommended): 
+
+  * Go to https://console.cloud.google.com/customer-identity/providers and click "ADD A PROVIDER."
+  * Select "Email / Password" and click "Enabled" and "Save."
 
 If you would like to use the "Login with Google" feature, follow the steps below. It's complicated, but I'd recommend attempting it since it's a nice option for users. Otherwise, skip to the next section.
 
@@ -124,6 +125,7 @@ This template uses a system I've set up to make complex R Shiny projects easier 
 * `ui.R` only handles high-level elements, while most of the UI is built using server files saved in the `app/server/` folder. 
 * I use Visual Studio Code to navigate the files and folder structure. In my experience, VS Code is better than RStudio for working with complex projects. `Ctrl+P` is a lifesaver! I still use RStudio to run code and debug with `browser()`, though. 
 
+
 **hcslim**
 
 This project uses [hcslim](https://github.com/superchordate/hcslim/) to utilize Highcharts for plotting. 
@@ -132,9 +134,11 @@ This project uses [hcslim](https://github.com/superchordate/hcslim/) to utilize 
 * Highcharts .js files are at `app/www/highcharts`. You can add/remove modules here. 
 * hcslim functions are at `app/server/_init/hcslim.R`
 
+
 **HTML Templates**
 
 When breaking free of opinionated frameworks, it is much easier to write UI in HTML. This project uses HTML templates, saved in the `app/templates/` folder. More on this at https://shiny.posit.co/r/articles/build/templates/.
+
 
 **Personal Style**
 
