@@ -56,7 +56,7 @@ If you would like to use the "Login with Google" feature, follow the steps below
   - Test users: Add yourself as a test user.
 
 * Create Oauth Client: Now we can create the actual client.
-  - Go to https://console.cloud.google.com/apis/credentials. Notice how the "OAuth 2.0 Client IDs" section is empty. We need to add one.
+  - Click "BACK TO DASHBOARD" at the bottom and click "Credentials" (expand the left sidebar).
   - Click "Create Credentials" and select "OAuth Client ID"
   - Select Application Type = "Web application" and enter a name.
   - Click "Create". The "OAuth client created" will pop up. Copy the Client ID and Client Secret to Notepad, you'll need both shortly. You can access them later by selecting your Oauth client at https://console.cloud.google.com/apis/credentials.
@@ -82,8 +82,8 @@ PUBLIC_FIREBASE_AUTH_DOMAIN=paste_domain_here
 * Authorize the local R Shiny development domain.
   - Run the app and note the URL. For me it is "http://127.0.0.1:4201/?".
   - Go to https://console.cloud.google.com/customer-identity/providers and click Settings (expand the left sidebar).
-  - Click "Security". We need to authorize the domain part of this: 127.0.0.1.
-  - Click 'ADD DOMAIN", enter "127.0.0.1" (or the value you see) and "SAVE."
+  - Click "SECURITY". We need to authorize the domain part of this: 127.0.0.1.
+  - Click 'ADD DOMAIN", enter "127.0.0.1" (or the value you see) and "SAVE".
 
 * Authorize the Oauth client for your Firebase app. Only necessary if you are using Sign In with Google.
   - Go to https://console.cloud.google.com/apis/credentials and select your Oauth client. 
