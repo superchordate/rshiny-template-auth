@@ -7,8 +7,14 @@ require(httr)
 
 # app settings. 
 # ! these only control the UI. make sure to set these same auth settings in Identity Provider to ensure users can't do anything you don't want them to.
+# see the README for setup instructions.
 app_title = 'R Shiny + Auth'
-auth_methods = list(email = TRUE, google = TRUE, allow_register_new_user = TRUE, invisible_recaptcha = FALSE)
+auth_methods = list(    
+    email = TRUE, # email and password registration, login, forgot password. 
+    allow_register_new_user = TRUE, # FALSE if you want to define your users on Identity Platform and not allow new users to register from the app.
+    google = TRUE, # log in with google account.
+    invisible_recaptcha = FALSE # use invisible reCAPTCHA to prevent bots from registering new accounts. defaults to FALSE since extra setup is required. 
+)
 
 enableBookmarking(store = "url")
 readRenviron('.env')
