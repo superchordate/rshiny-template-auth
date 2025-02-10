@@ -13,7 +13,7 @@ auth_methods = list(
     email = TRUE, # email and password registration, login, forgot password.
     allow_register_new_user = TRUE, # allow new users to register. 
     google = TRUE, # log in with google account.
-    mfa_sms = TRUE # require SMS MFA for email/password logins.
+    mfa_sms = TRUE # require two-factor authentication by SMS.
 )
 
 enableBookmarking(store = "url")

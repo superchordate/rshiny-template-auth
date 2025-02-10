@@ -67,19 +67,69 @@ verify_recaptcha = function(recaptcha_token){
 
 }
 
-# if no user is logged in, the client will send input$idToken = "logout".
-observeEvent(input$idToken, { 
+send_confirmation = function(idToken){    
+      
+    response = POST(
+        url = paste0("https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode?key=", Sys.getenv("PUBLIC_FIREBASE_API_KEY")),
+        body = toJSON(list(
+            requestType = "VERIFY_EMAIL",
+            idToken = idToken
+        ), auto_unbox = TRUE),
+        encode = "json",
+        content_type_json()
+    )
+    
+    result = content(response, "parsed")
+    
+    if(!is.null(result$error)){
+        warning(result$error$message)
+        session$sendCustomMessage('user_alert', paste0('Failed to send email confirmation. Please try again. ', result$error$message))
+        return()
+    }
+      
+    session$sendCustomMessage('user_alert', 'Please confirm your email address. Confirmation email has been sent.')
+}
 
-    if(input$idToken == 'logout'){
+observeEvent(input$user_logout, {
+    authorized(FALSE)
+})
+
+observeEvent(input$user_login, {
+    
+    # verify success by validating the idToken.
+    verified_user = verify_idToken(input$user_login[1])
+    if(is.null(verified_user) || is.null(verified_user$email)){
+      authorized(FALSE)
+      return()
+    }
+
+    # confirm the user has verified their email.
+    response = POST(
+        url = paste0("https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=", Sys.getenv("PUBLIC_FIREBASE_API_KEY")),
+        body = toJSON(list(
+            "idToken" = input$user_login[1]
+        ), auto_unbox = TRUE),
+        encode = "json",
+        content_type_json()
+    )
+    user = content(response, "parsed")$users[[1]]
+
+    # if not, send the user a confirmation email.
+    if(!user$emailVerified){
+        send_confirmation(input$user_login[1])        
+        authorized(FALSE)      
+    }
+
+    # if MFA is required, confirm the user has it set up. 
+    if(is.null(user$mfaInfo) || length(user$mfaInfo) == 0){
+        session$sendCustomMessage('show_mfa', 'show_mfa')
         authorized(FALSE)
         return()
     }
-    
-    # verify success by validating the idToken.
-    verified_user = verify_idToken(input$idToken)
-    if(!is.null(verified_user) && !is.null(verified_user$email)){
-      authorized(TRUE)
-    }
+
+    # if we got this far, the user is authorized.
+    # firebase will not change auth state on a MFA user until they have successfully authenticated with MFA.
+    authorized(TRUE)
 
 })
 
@@ -143,10 +193,15 @@ observeEvent(input$new_user_register, {
     
     # verify success by validating the idToken.
     verified_user = verify_idToken(result$idToken)
-    if(!is.null(verified_user) && !is.null(verified_user$email)){
-      session$sendCustomMessage('user_alert', paste0('Account created successfully!'))
-      authorized(TRUE)
+    if(is.null(verified_user) || is.null(verified_user$email)){
+      authorized(FALSE)
+      return()
     }
+
+    # the user will need to verify thier email address before being authorized. 
+    send_confirmation(input$user_login[1])
+    session$sendCustomMessage('user_alert', paste0('Account created successfully! Please verify your email address.'))
+    authorized(FALSE)
 
 })
 
@@ -164,4 +219,4 @@ observeEvent(input$new_user_register, {
 
 # # })
 
-# #TODO - what if user is already registered?
+# TODO: 

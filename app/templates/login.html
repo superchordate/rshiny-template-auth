@@ -109,6 +109,15 @@
 
     window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {'size': 'invisible'});
 
+    window.mfaRegisterShow = function(){
+        document.getElementById('email_password_block').classList.toggle('hidden');
+        document.getElementById('mfa_phone_block').classList.toggle('hidden');
+        document.getElementById('signin').classList.toggle('hidden');
+        document.getElementById('loginWithGoogle').classList.toggle('hidden');
+        document.getElementById('forgot_register_block').classList.toggle('hidden');
+    }
+    if(window.show_mfa) mfaRegisterShow();
+
     window.sendMfaCode = async () => {
 
         // if there is a resolver, we don't have a user yet. 
@@ -148,6 +157,7 @@
                     })
                     .catch(error => {
                         recaptchaVerifier.clear();
+                        console.log('sendMfaCode', error);
                         if (error.code === "auth/requires-recent-login") {
                             alert("reCAPTCHA needs a recent authentication. Please reauthenticate.");
                             auth.signOut();
@@ -198,9 +208,18 @@
             return multiFactor(user).enroll(multiFactorAssertion).then(() => {
                 Shiny.setInputValue('mfa_verification', {mfa_verificationId: window.mfa_verificationId, mfa_code: mfa_code})
             }).catch((error) => {
-                // recaptchaVerifier.clear();
-                console.log(error);
-                alert("Verification failed. Please try again.")
+                
+                if(error.code === 'auth/second-factor-already-in-use'){
+                    // this means we accidentally followed the enroll flow. 
+                    // log out and try again. 
+                    alert("This account already has multi-factor authentication enabled. Something went wrong, sorry! Please try again.");
+                    auth.signOut();
+                    window.recaptchaVerifier.clear();
+                    window.location.reload();
+                } else {
+                    console.log(error);
+                    alert("Verification failed. Please try again.")
+                }
             });
 
         }

@@ -47,12 +47,14 @@
         .then(() => {
           auth.onAuthStateChanged((iuser) => {
             if (iuser) {
-              iuser.getIdToken().then(function (idToken) {
-                Shiny.setInputValue("idToken", idToken);
-                window.user = iuser;
-              });
+
+                iuser.getIdToken().then(function (idToken) {
+                  Shiny.setInputValue("user_login", [idToken, iuser]);
+                  window.user = iuser;
+                });
+
             } else {
-              Shiny.setInputValue("idToken", "logout");
+              Shiny.setInputValue("user_logout", "logout");
           }})
 
         })
@@ -63,6 +65,10 @@
           window.location.reload();
         }
       });
+
+      Shiny.addCustomMessageHandler("show_mfa", function(message){
+        window.show_mfa = true; 
+      })
 
     </script>
   
