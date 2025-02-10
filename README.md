@@ -40,7 +40,11 @@ To use this project:
 * Initialize Project on Google Cloud Platform (GCP): Create a new project to make it easier to delete all the resources when you are finished testing.
   - Follow the steps at https://developers.google.com/workspace/guides/create-project including setting up a billing account. Don't worry, you won't get charged until you hit 50,000 monthly active users<sup>[1](https://cloud.google.com/identity-platform/pricing)</sup>. You can set up [billing alerts](https://cloud.google.com/billing/docs/how-to/budgets) to be more sure you won't see high billing. 
   - Go to https://console.cloud.google.com/customer-identity/providers and click "Enable Identity Platform."
-  - **Disable New User Registration** (see section below about New User Registration): Click Settings (expand the left sidebar) > Un-check "Enable create (sign-up)", Un-check "Enable delete" > Click SAVE. This will ensure users can only be modified by you, using the GCP console.
+
+* Disable new user registration (optional):
+  - If you can manage users yourself by adding them in Identity Platform, that is more secure than allowing new registration via the site. This template will use reCAPTCHA to try and reduce registrations by bots, but it is not difficult for bots to get around this restriction. 
+  - Click Settings (expand the left sidebar) > Un-check "Enable create (sign-up)", Un-check "Enable delete" > Click SAVE. 
+  - This will ensure users can only be modified by you, using the GCP console. Also: at global.R, set allow_register_new_user = FALSE.
 
 If you would like to allow users to log in with email (recommended): 
 
@@ -139,15 +143,6 @@ This template makes it easy to add multi-factor authentication via SMS. MFA will
 * Go to https://console.cloud.google.com/customer-identity/mfa and click "ENABLE".
 * Add your phone number under "Phone numbers for testing (optional)"
 * Go to https://console.firebase.google.com/ > Build > Authentication > Settings > SMS region policy > Allow United States > Save. 
-
-## New User Registration
-
-New user registration is not (yet) handled in this template. This can be easily done with the client-side Firebase Auth JS module, but then any bot could create many accounts.
-
-Any valid method would need to happen on a server and include reCAPTCHA, email verification, and identity provider idToken verification. Running this on the server requires using the [Firebase Admin SDK](https://firebase.google.com/docs/admin/setup) which is not available in R. There is an approach I think would work, using the admin SDK in a cloud function running within the same project. However, this would complicate the project. 
-
-I expect a small number of users so I am OK adding the users myself and as a result have chosen not to include this as a feature in my template. 
-
 
 ## On the Web
 
