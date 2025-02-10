@@ -37,9 +37,10 @@ To use this project:
 
 ## Identity Platform Setup
 
-* Initialize Project on Google Cloud Platform: Create a new project to make it easier to delete all the resources when you are finished testing.
+* Initialize Project on Google Cloud Platform (GCP): Create a new project to make it easier to delete all the resources when you are finished testing.
   - Follow the steps at https://developers.google.com/workspace/guides/create-project including setting up a billing account. Don't worry, you won't get charged until you hit 50,000 monthly active users<sup>[1](https://cloud.google.com/identity-platform/pricing)</sup>. You can set up [billing alerts](https://cloud.google.com/billing/docs/how-to/budgets) to be more sure you won't see high billing. 
   - Go to https://console.cloud.google.com/customer-identity/providers and click "Enable Identity Platform."
+  - **Disable New User Registration** (see section below about New User Registration): Click Settings (expand the left sidebar) > Un-check "Enable create (sign-up)", Un-check "Enable delete" > Click SAVE. This will ensure users can only be modified by you, using the GCP console.
 
 If you would like to allow users to log in with email (recommended): 
 
@@ -124,22 +125,28 @@ After following Identity Provider setup steps:
   - Click Show key, copy into `.env` as `RECAPTCHA_API_KEY`
   - Click Close and Save
 
-* In global.R, set `invisible_recaptcha = TRUE`.
-
 * This may require extra setup when publishing to the web. The server must be authenticated with reCAPTCHA and your google project. I expect this will be automatic if using Google Cloud Run on the same project, but it might be tricky on other publishing platforms. See https://cloud.google.com/recaptcha/docs/authentication for more information. 
 
-TODO: these steps may not be necessary when importing directly. 
+**TODO: these steps may not be necessary when importing directly, and it only really makes sense to add it for MFA since we aren't allowing user registration. **
 
 ## Multi-Factor Authentication
 
 Ultimately, passwords aren't enough to protect sensitive data<sup>[4](https://techcommunity.microsoft.com/blog/microsoft-entra-blog/your-paword-doesnt-matter/731984)</sup>. It is smart to also require MFA on your accounts.
 
-This template makes it easy to add multi-factor authentication via SMS. Full instructions from Google are at https://cloud.google.com/identity-platform/docs/web/mfa.
+This template makes it easy to add multi-factor authentication via SMS. MFA will be required for all users who sign into your app, including those that sign in with Google. 
 
 * MFA requires reCAPTCHA, so follow steps for reCAPTCHA Setup above. 
 * Go to https://console.cloud.google.com/customer-identity/mfa and click "ENABLE".
 * Add your phone number under "Phone numbers for testing (optional)"
 * Go to https://console.firebase.google.com/ > Build > Authentication > Settings > SMS region policy > Allow United States > Save. 
+
+## New User Registration
+
+New user registration is not (yet) handled in this template. This can be easily done with the client-side Firebase Auth JS module, but then any bot could create many accounts.
+
+Any valid method would need to happen on a server and include reCAPTCHA, email verification, and identity provider idToken verification. Running this on the server requires using the [Firebase Admin SDK](https://firebase.google.com/docs/admin/setup) which is not available in R. There is an approach I think would work, using the admin SDK in a cloud function running within the same project. However, this would complicate the project. 
+
+I expect a small number of users so I am OK adding the users myself and as a result have chosen not to include this as a feature in my template. 
 
 
 ## On the Web

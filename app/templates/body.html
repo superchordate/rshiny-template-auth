@@ -33,7 +33,6 @@
 
       import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.2.0/firebase-app.js'
       import { getAuth, browserLocalPersistence } from 'https://www.gstatic.com/firebasejs/11.2.0/firebase-auth.js'
-      import { ReCaptchaEnterpriseProvider } from 'https://www.gstatic.com/firebasejs/11.2.0/firebase-app-check.js'
 
       const config = {
         apiKey: "{{ firebase_config$apiKey }}",
@@ -42,9 +41,7 @@
 
       window.app = initializeApp(config);
       window.auth = getAuth(app);
-      window.recap_provider = new ReCaptchaEnterpriseProvider('{{ Sys.getenv("PUBLIC_RECAPTCHA_SITE_KEY") }}')
-      
-      window.user = null; // will need to persist this for mfa.
+      window.user = null; // will need to persist this for the login template.
 
       auth.setPersistence(browserLocalPersistence)
         .then(() => {
@@ -60,26 +57,12 @@
 
         })
 
-
-      // putting all handlers in body to prevent them running multiple times. 
-      let recaptcha_passed = false;
-      Shiny.addCustomMessageHandler('recaptcha_score', function(score) {
-          if(score > 0.75) {
-              recaptcha_passed = true;
-              newUserShow();
-          } else {
-              alert('Failed reCAPTCHA');
-          }
+      Shiny.addCustomMessageHandler("user_alert", function (message) {
+        alert(message)
+        if(message == 'ReCAPTCHA failed.') {
+          window.location.reload();
+        }
       });
-      // Shiny.addCustomMessageHandler('verified_user', function(true_false) {
-      //     if(true_false == true && document.getElementById('mfa_phone_block')){              
-      //         document.getElementById('mfa_phone_block').classList.toggle('hidden');
-      //         document.getElementById('email_password_block').classList.toggle('hidden');
-      //         document.getElementById('loginWithGoogle').classList.toggle('hidden'); 
-      //         document.getElementById('forgot_register_block').classList.toggle('hidden'); 
-      //         document.getElementById('signin').classList.toggle('hidden');
-      //     }
-      // });
 
     </script>
   

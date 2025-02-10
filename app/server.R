@@ -15,7 +15,7 @@ server = function(input, output, session) {
   # show login when logout condition applies.
   output$login = renderUI({ 
     if(!is.null(authorized()) && !authorized()) { 
-      htmlTemplate("templates/login.html", auth_methods = auth_methods) 
+      htmlTemplate("templates/login.html", auth_methods = auth_methods)
   }})
 
   # this output hides all app content behind the authorization flow.

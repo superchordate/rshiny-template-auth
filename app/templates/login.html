@@ -3,6 +3,7 @@
     <h2 class="text-2xl font-bold mb-6 text-center text-gray-800">Login</h2>
     
     <div>
+        <!-- email / password inputs -->
         {{if(auth_methods$email) HTML('
             <div id="email_password_block" class="">
                 <div class="mb-4">
@@ -20,10 +21,27 @@
                     <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline" 
                         id="password" type="password" placeholder="*****************" required>
                 </div>
+                
+                <button id="signin" class="cursor-pointer bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline w-full" 
+                    onclick="loginWithEmailPassword()">
+                    Sign In
+                </button>
+                    
+                <button id="forgotPassword" class="hidden cursor-pointer bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline w-full" 
+                    onclick="forgotPassword()">
+                        Send Password Reset Email
+                </button>
+                                
+                <button id="newUser" class="hidden cursor-pointer bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline w-full" 
+                    onclick="registerNewUser()">
+                        Register
+                </button>
+
             </div>
         ')}}
 
-        {{if(auth_methods$email_mfa_sms) HTML('
+        <!-- MFA -->
+        {{if(auth_methods$mfa_sms) HTML('
             <div id="mfa_phone_block" class="hidden mb-4">
                 <label class="block text-gray-700 text-sm font-bold mb-2" for="mfa_phone">
                     Phone Number
@@ -36,7 +54,7 @@
                     Send Code
                 </button>
             </div>
-
+            
             <div id="mfa_code_block" class="hidden mb-4">                
                 <label class="text-gray-700 text-sm font-bold mb-2" for="mfa_code">
                     Verification Code
@@ -50,48 +68,33 @@
             </div>
         ')}}
         
+        <!-- log in with google  -->
+        {{if(auth_methods$google) HTML('
         <div class="flex flex-col gap-4">
-            
-            {{if(auth_methods$email) HTML('
-                <button id="signin" class="cursor-pointer bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline w-full" 
-                    onclick="loginWithEmailPassword()">
-                    Sign In
-                </button>
-                
-                <button id="forgotPassword" class="hidden cursor-pointer bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline w-full" 
-                    onclick="forgotPassword()">
-                        Send Password Reset Email
-                </button>
-                                
-                <button id="newUser" class="hidden cursor-pointer bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline w-full" 
-                    onclick="newUser()">
-                        Register
-                </button>
-            ')}}
-            
-            {{if(auth_methods$google) HTML('
-                <button type="button" id="loginWithGoogle"
-                    onclick="loginWithGoogle()"
-                    class="cursor-pointer flex items-center justify-center gap-2 bg-white border border-gray-300 text-gray-700 font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline w-full hover:bg-gray-50">
-                    <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxOCIgaGVpZ2h0PSIxOCIgdmlld0JveD0iMCAwIDQ4IDQ4Ij48cGF0aCBmaWxsPSIjRkZDMTA3IiBkPSJNNDMuNjExLDIwLjA4M0g0MlYyMEgyNHY4aDExLjMwM2MtMS42NDksNC42NTctNi4wOCw4LTExLjMwMyw4Yy02LjYyNywwLTEyLTUuMzczLTEyLTEyYzAtNi42MjcsNS4zNzMtMTIsMTItMTJjMy4wNTksMCw1Ljg0MiwxLjE1NCw3Ljk2MSwzLjAzOWw1LjY1Ny01LjY1N0MzNC4wNDYsNi4wNTMsMjkuMjY4LDQsMjQsNEMxMi45NTUsNCw0LDEyLjk1NSw0LDI0YzAsMTEuMDQ1LDguOTU1LDIwLDIwLDIwYzExLjA0NSwwLDIwLTguOTU1LDIwLTIwQzQ0LDIyLjY1OSw0My44NjIsMjEuMzUsNDMuNjExLDIwLjA4M3oiPjwvcGF0aD48cGF0aCBmaWxsPSIjRkYzRDAwIiBkPSJNNi4zMDYsMTQuNjkxbDYuNTcxLDQuODE5QzE0LjY1NSwxNS4xMDgsMTguOTYxLDEyLDI0LDEyYzMuMDU5LDAsNS44NDIsMS4xNTQsNy45NjEsMy4wMzlsNS42NTctNS42NTdDMzQuMDQ2LDYuMDUzLDI5LjI2OCw0LDI0LDRDMTYuMzE4LDQsOS42NTYsOC4zMzcsNi4zMDYsMTQuNjkxeiI+PC9wYXRoPjxwYXRoIGZpbGw9IiM0Q0FGNTAiIGQ9Ik0yNCw0NGM1LjE2NiwwLDkuODYtMS45NzcsMTMuNDA5LTUuMTkybC02LjE5LTUuMjM4QzI5LjIxMSwzNS4wOTEsMjYuNzE1LDM2LDI0LDM2Yy01LjIwMiwwLTkuNjE5LTMuMzE3LTExLjI4My03Ljk0NmwtNi41MjIsNS4wMjVDOS41MDUsMzkuNTU2LDE2LjIyNyw0NCwyNCw0NHoiPjwvcGF0aD48cGF0aCBmaWxsPSIjMTk3NkQyIiBkPSJNNDMuNjExLDIwLjA4M0g0MlYyMEgyNHY4aDExLjMwM2MtMC43OTIsMi4yMzctMi4yMzEsNC4xNjYtNC4wODcsNS41NzFjMC4wMDEtMC4wMDEsMC4wMDItMC4wMDEsMC4wMDMtMC4wMDJsNi4xOSw1LjIzOEMzNi45NzEsMzkuMjA1LDQ0LDM0LDQ0LDI0QzQ0LDIyLjY1OSw0My44NjIsMjEuMzUsNDMuNjExLDIwLjA4M3oiPjwvcGF0aD48L3N2Zz4=" 
-                        alt="Google logo" 
-                        class="w-6 h-6">
-                    Login with Google
-                </button>
-            ')}}
+            <button type="button" id="loginWithGoogle"
+                onclick="loginWithGoogle()"
+                class="mt-4 cursor-pointer flex items-center justify-center gap-2 bg-white border border-gray-300 text-gray-700 font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline w-full hover:bg-gray-50">
+                <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxOCIgaGVpZ2h0PSIxOCIgdmlld0JveD0iMCAwIDQ4IDQ4Ij48cGF0aCBmaWxsPSIjRkZDMTA3IiBkPSJNNDMuNjExLDIwLjA4M0g0MlYyMEgyNHY4aDExLjMwM2MtMS42NDksNC42NTctNi4wOCw4LTExLjMwMyw4Yy02LjYyNywwLTEyLTUuMzczLTEyLTEyYzAtNi42MjcsNS4zNzMtMTIsMTItMTJjMy4wNTksMCw1Ljg0MiwxLjE1NCw3Ljk2MSwzLjAzOWw1LjY1Ny01LjY1N0MzNC4wNDYsNi4wNTMsMjkuMjY4LDQsMjQsNEMxMi45NTUsNCw0LDEyLjk1NSw0LDI0YzAsMTEuMDQ1LDguOTU1LDIwLDIwLDIwYzExLjA0NSwwLDIwLTguOTU1LDIwLTIwQzQ0LDIyLjY1OSw0My44NjIsMjEuMzUsNDMuNjExLDIwLjA4M3oiPjwvcGF0aD48cGF0aCBmaWxsPSIjRkYzRDAwIiBkPSJNNi4zMDYsMTQuNjkxbDYuNTcxLDQuODE5QzE0LjY1NSwxNS4xMDgsMTguOTYxLDEyLDI0LDEyYzMuMDU5LDAsNS44NDIsMS4xNTQsNy45NjEsMy4wMzlsNS42NTctNS42NTdDMzQuMDQ2LDYuMDUzLDI5LjI2OCw0LDI0LDRDMTYuMzE4LDQsOS42NTYsOC4zMzcsNi4zMDYsMTQuNjkxeiI+PC9wYXRoPjxwYXRoIGZpbGw9IiM0Q0FGNTAiIGQ9Ik0yNCw0NGM1LjE2NiwwLDkuODYtMS45NzcsMTMuNDA5LTUuMTkybC02LjE5LTUuMjM4QzI5LjIxMSwzNS4wOTEsMjYuNzE1LDM2LDI0LDM2Yy01LjIwMiwwLTkuNjE5LTMuMzE3LTExLjI4My03Ljk0NmwtNi41MjIsNS4wMjVDOS41MDUsMzkuNTU2LDE2LjIyNyw0NCwyNCw0NHoiPjwvcGF0aD48cGF0aCBmaWxsPSIjMTk3NkQyIiBkPSJNNDMuNjExLDIwLjA4M0g0MlYyMEgyNHY4aDExLjMwM2MtMC43OTIsMi4yMzctMi4yMzEsNC4xNjYtNC4wODcsNS41NzFjMC4wMDEtMC4wMDEsMC4wMDItMC4wMDEsMC4wMDMtMC4wMDJsNi4xOSw1LjIzOEMzNi45NzEsMzkuMjA1LDQ0LDM0LDQ0LDI0QzQ0LDIyLjY1OSw0My44NjIsMjEuMzUsNDMuNjExLDIwLjA4M3oiPjwvcGF0aD48L3N2Zz4=" 
+                    alt="Google logo" 
+                    class="w-6 h-6">
+                Login with Google
+            </button>
         </div>
+        ')}}
 
-        {{if(auth_methods$email) HTML(paste0('
+        <!-- forgot password/register new user -->
+        {{if(auth_methods$email) HTML(paste0(c('
             <div id="forgot_register_block" class="mt-4 space-4">
                 <button class="cursor-pointer text-gray-600 hover:text-gray-800 text-sm mb-2 underline" onclick="forgotPasswordShow()" id="forgotPassword_button">
                     Forgot password?
-                </button><br/>', if(auth_methods$allow_register_new_user) '
-                <button class="cursor-pointer text-gray-600 hover:text-gray-800 text-sm underline" onclick="recaptcha()" id="newUser_button">
+                </button>
+                <br/>', if(auth_methods$allow_register_new_user){ '
+                <button class="cursor-pointer text-gray-600 hover:text-gray-800 text-sm underline" onclick="registerNewUserShow()" id="newUser_button">
                     Register as a new user.
-                </button>', '
+                </button>' }, '
             </div>
-        '))}}
-    </div>
+        ')))}}
+</div>
 
     <div id="recaptcha-container"></div>
 
@@ -100,8 +103,8 @@
 <script type="module">
 
     import { 
-        getAuth, RecaptchaVerifier, multiFactor, PhoneAuthProvider, createUserWithEmailAndPassword , signInWithEmailAndPassword ,
-        PhoneMultiFactorGenerator, getMultiFactorResolver, GoogleAuthProvider, signInWithPopup
+        getAuth, RecaptchaVerifier, multiFactor, PhoneAuthProvider, signInWithEmailAndPassword ,
+        PhoneMultiFactorGenerator, getMultiFactorResolver, GoogleAuthProvider, signInWithPopup, sendPasswordResetEmail
     } from 'https://www.gstatic.com/firebasejs/11.2.0/firebase-auth.js'
 
     window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {'size': 'invisible'});
@@ -204,23 +207,6 @@
 
     }
 
-    // TODO: try this without the ID using RecaptchaVerifier
-    function recaptcha(){
-
-        // if recaptcha is not enabled, pass a dummy value to continue the registration flow. 
-        {{ if(!auth_methods$invisible_recaptcha) HTML('Shiny.setInputValue("recaptcha_token", "dummy"); return;') }}
-        
-        window.recap_provider.ready(async () => {
-            try {
-                const token = await grecaptcha.enterprise.execute('{{ Sys.getenv("PUBLIC_RECAPTCHA_SITE_KEY") }}', {action: 'REGISTER'});
-                Shiny.setInputValue("recaptcha_token", token);
-            } catch (error) {
-                alert('Failed reCAPTCHA');
-            }
-        });
-
-    }
-
     window.loginWithEmailPassword = function () {
 
         const email = document.getElementById('email').value;
@@ -239,6 +225,9 @@
                     document.getElementById('signin').classList.toggle('hidden');
                     document.getElementById('loginWithGoogle').classList.toggle('hidden');
                     document.getElementById('forgot_register_block').classList.toggle('hidden');
+
+                } else if(error.code == 'auth/invalid-credential') {
+                    alert("Invalid email or password. Please try again.");
 
                 } else {
                     console.log(error)
@@ -260,6 +249,9 @@
                 document.getElementById('signin').classList.toggle('hidden');
                 document.getElementById('loginWithGoogle').classList.toggle('hidden');
                 document.getElementById('forgot_register_block').classList.toggle('hidden');
+
+            } else if(error.code == 'auth/admin-restricted-operation') {
+                alert("Not a user. Please contact Support.");
                 
             } else {
                 console.log(error)
@@ -267,48 +259,67 @@
         });
     }
 
-    function forgotPasswordShow(){
+    window.forgotPasswordShow = function(){
         document.getElementById('signin').classList.toggle('hidden');
         document.getElementById('passwordblock').classList.toggle('hidden');
         document.getElementById('loginWithGoogle').classList.toggle('hidden');
         document.getElementById('forgotPassword').classList.toggle('hidden');
         document.getElementById('forgotPassword_button').classList.toggle('hidden');
-        document.getElementById('newUser_button').classList.toggle('hidden');
+        // document.getElementById('newUser_button').classList.toggle('hidden');
     }
 
-    function forgotPassword() {
-        const email = document.getElementById('email').value;
-        auth.sendPasswordResetEmail(email)
-            .then(() => {
-                alert("Password reset email sent!");
+    window.forgotPassword = function() {
+
+        const email = document.getElementById('email').value;      
+        
+        window.recaptchaVerifier.verify()
+            .then(token => {
+                Shiny.setInputValue(
+                    'forgot_password', 
+                    [token, document.getElementById('email').value]
+                );
             })
-            .catch((error) => {
-                alert(error)
+            .catch(error => {
+                alert('Failed reCAPTCHA');
+                console.log(error);
             });
+
     }
 
-    function newUserShow() {
+    window.registerNewUserShow = function(){
         document.getElementById('signin').classList.toggle('hidden');
         document.getElementById('loginWithGoogle').classList.toggle('hidden');
         document.getElementById('forgotPassword_button').classList.toggle('hidden');
         document.getElementById('newUser_button').classList.toggle('hidden');
         document.getElementById('newUser').classList.toggle('hidden');
     }
-    
-    function newUser() {
-        if(!recaptcha_passed){ 
-            alert("reCAPTCHA not passed!");
-            return; 
+    window.registerNewUser = function() {
+
+        // new user flow:
+        //   validate username/password.
+        //   check recaptcha and get token.
+        //   send username, password, and recaptcha token to server for verification and account creation.
+
+        if(!document.getElementById('email').value){
+            alert("Email is required.");
+            return;
         }
-        const email = document.getElementById('email').value;
-        const password = document.getElementById('password').value;
-        auth.createUserWithEmailAndPassword(email, password)
-            .then(user => {
-                alert("User created!");
-                newUserShow()
+
+        if(!document.getElementById('password').value){
+            alert("Password is required.");
+            return;
+        }
+        
+        window.recaptchaVerifier.verify()
+            .then(token => {
+                Shiny.setInputValue(
+                    'new_user_register', 
+                    [token, document.getElementById('email').value, document.getElementById('password').value]
+                );
             })
-            .catch((error) => {
-                alert(error)
+            .catch(error => {
+                alert('Failed reCAPTCHA');
+                console.log(error);
             });
     }
 
