@@ -72,7 +72,11 @@
         })
         
       Shiny.addCustomMessageHandler("show_mfa", function(message){
-        window.show_mfa = true; 
+        mfaPhoneShow();
+      })
+        
+      Shiny.addCustomMessageHandler("log_user_out", function(message){
+        auth.signOut();
       })
 
       // reset the view whenever the hash changes to default.

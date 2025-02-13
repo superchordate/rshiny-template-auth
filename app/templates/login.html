@@ -55,17 +55,18 @@
 
         <!-- MFA -->
         {{if(auth_methods$mfa_sms) HTML('
-            <form id="mfa_form" class="hidden mb-4">
-                <label class="block text-gray-700 text-sm font-bold mb-2" for="mfa_phone">
-                    Phone Number
-                </label>
-                <div class="w-full flex">
+            <form id="mfa_form" class="mb-4 hidden">
+                <div class="grid grid-cols-1 gap-2">
+                    <p class=" mx-2">Two-factor authentication is required on this application.</p>
+                    <p class=" mx-2">Please enter a Phone Number and an SMS code will be sent.</p>
+                    <p class="italic mx-2">Carrier charges may apply.</p>
+                </div>
+                <div class="w-full flex mt-4">
                     <div class="inline-block w-8 place-self-center pl-1">+1</div>
                     <input class="inline-block shadow appearance-none border rounded py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline flex-1" 
                         id="mfa_phone" type="text" placeholder="###-###-####">
                 </div>
-                <p class="text-sm italic mt-1 mb-8">Only used for Two-Factor Authentication</p>
-                <input type="submit" value="Send Code" class="cursor-pointer bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline w-full" 
+                <input type="submit" value="Send Code" class="mt-4 cursor-pointer bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline w-full" 
                     onclick="sendMfaCode()">
             </form>
             
@@ -154,7 +155,6 @@
         document.getElementById('forgot_register_block').classList.add('hidden');
         window.location.hash = 'mfa';
     }
-    if(window.show_mfa) mfaPhoneShow();
 
     window.mfaCodeShow = function(){
         document.getElementById('email_password_login').classList.add('hidden');

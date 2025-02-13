@@ -94,6 +94,14 @@ observeEvent(input$user_logout, {
     authorized(FALSE)
 })
 
+ok_to_show_mfa = FALSE
+
+# anytime we set authorized to FALSE, we also want to clear the login form to allow another attempt.
+not_authorized = function(){
+  authorized(FALSE)
+  updateTextInput(session, "user_login", value = NULL)
+}
+
 observeEvent(input$user_login, {
 
     if(is.null(input$user_login)) return()
@@ -101,7 +109,7 @@ observeEvent(input$user_login, {
     # verify success by validating the idToken.
     verified_user = verify_idToken(input$user_login[1])
     if(is.null(verified_user) || is.null(verified_user$email)){
-      authorized(FALSE)
+      not_authorized()
       return()
     }
 
@@ -119,15 +127,22 @@ observeEvent(input$user_login, {
     # if not, send the user a confirmation email.
     if(!user$emailVerified){
         send_confirmation(input$user_login[1])
-        authorized(FALSE)
-        updateTextInput(session, "user_login", value = NULL)
+        not_authorized()
+        return()
     }
 
-    # if MFA is required, confirm the user has it set up. 
+    # if MFA is required, confirm the user has it set up.
+    # we only check this if an initial login attempt has already been made.
     if(is.null(user$mfaInfo) || length(user$mfaInfo) == 0){
+      print(ok_to_show_mfa)
+      if(ok_to_show_mfa){
         session$sendCustomMessage('show_mfa', 'show_mfa')
-        authorized(FALSE)
-        return()
+      } else {
+        ok_to_show_mfa <<- TRUE
+        session$sendCustomMessage('log_user_out', 'log_user_out') # we need to log the user out to allow another attempt. 
+      }
+      not_authorized()
+      return()
     }
 
     # if we got this far, the user is authorized.
