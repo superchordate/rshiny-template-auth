@@ -80,7 +80,10 @@
       })
 
       // reset the view whenever the hash changes to default.
-      window.onhashchange = () => { if(location.hash === "") { window.location.reload() } }
+      // this breaks tab selectors.
+      window.onhashchange = () => { 
+        if(location.hash === "" && window.loginShow) { loginShow() } 
+      }
 
       // user alert stuff.
       const alertTypes = {

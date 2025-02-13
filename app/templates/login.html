@@ -123,6 +123,17 @@
     window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {'size': 'invisible'});
 
     // visibility handlers.
+    window.loginShow = function(){
+        document.getElementById('email_password_login').classList.remove('hidden');
+        document.getElementById('forgot_password').classList.add('hidden');
+        document.getElementById('register_new_user').classList.add('hidden');
+        document.getElementById('mfa_form').classList.add('hidden');
+        document.getElementById('mfa_code_form').classList.add('hidden');
+        document.getElementById('loginWithGoogle_block').classList.remove('hidden');
+        document.getElementById('forgot_register_block').classList.remove('hidden');
+        window.location.hash = '';
+    }
+    
     window.forgotPasswordShow = function(){
         document.getElementById('email_password_login').classList.add('hidden');
         document.getElementById('forgot_password').classList.remove('hidden');
