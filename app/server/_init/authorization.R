@@ -67,7 +67,7 @@ verify_recaptcha = function(recaptcha_token){
 
 }
 
-send_confirmation = function(idToken){    
+send_confirmation = function(idToken, alert = TRUE){
       
     response = POST(
         url = paste0("https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode?key=", Sys.getenv("PUBLIC_FIREBASE_API_KEY")),
@@ -83,11 +83,11 @@ send_confirmation = function(idToken){
     
     if(!is.null(result$error)){
         warning(result$error$message)
-        session$sendCustomMessage('user_alert', paste0('Failed to send email confirmation. Please try again. ', result$error$message))
+        session$sendCustomMessage('user_warning', paste0('Failed to send email confirmation. Please try again. ', result$error$message))
         return()
     }
       
-    session$sendCustomMessage('user_alert', 'Please confirm your email address. Confirmation email has been sent.')
+    if(alert) session$sendCustomMessage('user_alert', 'Please confirm your email address. Confirmation email has been sent.')
 }
 
 observeEvent(input$user_logout, {
@@ -95,6 +95,8 @@ observeEvent(input$user_logout, {
 })
 
 observeEvent(input$user_login, {
+
+    if(is.null(input$user_login)) return()
     
     # verify success by validating the idToken.
     verified_user = verify_idToken(input$user_login[1])
@@ -116,8 +118,9 @@ observeEvent(input$user_login, {
 
     # if not, send the user a confirmation email.
     if(!user$emailVerified){
-        send_confirmation(input$user_login[1])        
-        authorized(FALSE)      
+        send_confirmation(input$user_login[1])
+        authorized(FALSE)
+        updateTextInput(session, "user_login", value = NULL)
     }
 
     # if MFA is required, confirm the user has it set up. 
@@ -136,7 +139,7 @@ observeEvent(input$user_login, {
 observeEvent(input$forgot_password, {
 
     if(!verify_recaptcha(input$forgot_password[1])){
-        session$sendCustomMessage('user_alert', 'ReCAPTCHA failed.')
+        session$sendCustomMessage('user_error', 'ReCAPTCHA failed. Please refresh the page and try again.')
         return()
     }
 
@@ -152,13 +155,7 @@ observeEvent(input$forgot_password, {
     )
     result = content(response, "parsed")
     
-    if(!is.null(result$error)){
-      warning(result$error$message)
-      session$sendCustomMessage('user_alert', paste0('Failed to add user. Please try again. ', result$error$message))
-      return()
-    }
-    
-    session$sendCustomMessage('user_alert', 'Reset email sent!')
+    session$sendCustomMessage('user_alert', 'If the email matches our system, a reset email has been sent.')
 
 })
 
@@ -166,8 +163,10 @@ observeEvent(input$forgot_password, {
 # Leaving code from my attempt to add a registration flow here, in case it does come in handy.
 observeEvent(input$new_user_register, {
 
+    if(is.null(input$new_user_register)) return()
+
     if(!verify_recaptcha(input$forgot_password[1])){
-        session$sendCustomMessage('user_alert', 'ReCAPTCHA failed.')
+        session$sendCustomMessage('user_error', 'ReCAPTCHA failed. Please refresh the page and try again.')
         return()
     }
 
@@ -187,7 +186,9 @@ observeEvent(input$new_user_register, {
     
     if(!is.null(result$error)){
       warning(result$error$message)
-      session$sendCustomMessage('user_alert', paste0('Failed to add user. Please try again. Error: ', result$error$message))
+      # we don't share the error since it can indicate if an email exists or not.
+      warning(paste0('Failed to add user. Please try again. Error: ', result$error$message))
+      session$sendCustomMessage('user_error', 'Failed to add user. Please try again.')
       return()
     }
     
@@ -198,25 +199,10 @@ observeEvent(input$new_user_register, {
       return()
     }
 
-    # the user will need to verify thier email address before being authorized. 
-    send_confirmation(input$user_login[1])
-    session$sendCustomMessage('user_alert', paste0('Account created successfully! Please verify your email address.'))
+    # the user will need to verify their email address before being authorized. 
+    send_confirmation(result$idToken, alert = FALSE)
+    session$sendCustomMessage('user_success', 'A verification email has been sent. Please click the link in the email to verify your email address.')
+    updateTextInput(session, "new_user_register", value = NULL)
     authorized(FALSE)
 
 })
-
-# # observeEvent(input$mfa_verification, {
-  
-# #     verified_user_mfa = verify_idToken(input$mfa_verification$`_tokenResponse`$idToken)
-    
-# #     #TODO how to verify MFA on server. 
-
-# #     if(!is.null(verified_user_mfa) && !is.null(verified_user_mfa$email)){
-# #         authorized(TRUE)
-# #     } else {
-# #         authorized(FALSE)
-# #     }
-
-# # })
-
-# TODO: 
