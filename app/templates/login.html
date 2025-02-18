@@ -1,10 +1,9 @@
-<!-- Claude helped me build this! -->
 <div id="login_template" class="w-full pt-12 mt-12 flex justify-center"><div class="bg-white p-8 rounded-lg shadow-md w-96">
     <h2 class="text-2xl font-bold mb-6 text-center text-gray-800">Login</h2>
     
     <div>
-        <!-- email / password inputs -->
         {{if(auth_methods$email) HTML('
+            <!-- email / password login -->
             <form id="email_password_login">
                 <label class="block text-gray-700 text-sm font-bold mb-2" for="email_password_login_email">
                     Email
@@ -20,6 +19,7 @@
                     onclick="loginWithEmailPassword()">
             </form>
 
+            <!-- forgot password -->
             <form id="forgot_password" class="hidden">
                 <label class="block text-gray-700 text-sm font-bold mb-2" for="forgot_password_email">
                     Email
@@ -30,6 +30,7 @@
                     onclick="forgotPassword()">
             </form>
 
+            <!-- registration  -->
             <form id="register_new_user" class="hidden">
                 <label class="block text-gray-700 text-sm font-bold mb-2" for="register_new_user_email">
                     Email
@@ -46,7 +47,7 @@
                 </label>
                 <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" 
                     id="register_new_user_password_confirm" type="password" placeholder="*****************">
-                <input type="submit" value="Sign In" class="cursor-pointer bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline w-full mt-6" 
+                <input type="submit" value="Register" class="cursor-pointer bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline w-full mt-6" 
                     onclick="registerNewUser()">
             </form>
 
@@ -95,7 +96,7 @@
         </div>
         ')}}
 
-        <!-- forgot password/register new user -->
+        <!-- bottom buttons: forgot password/register new user -->
         {{if(auth_methods$email) HTML(paste0(c('
             <div id="forgot_register_block" class="mt-4 space-4">
                 <button class="cursor-pointer text-gray-600 hover:text-gray-800 text-sm mb-2 underline" onclick="forgotPasswordShow()" id="forgotPassword_button">
@@ -124,6 +125,7 @@
 
     // visibility handlers.
     window.loginShow = function(){
+        stopSpinner();
         document.getElementById('email_password_login').classList.remove('hidden');
         document.getElementById('forgot_password').classList.add('hidden');
         document.getElementById('register_new_user').classList.add('hidden');
@@ -136,6 +138,7 @@
     }
     
     window.forgotPasswordShow = function(){
+        stopSpinner();
         document.getElementById('email_password_login').classList.add('hidden');
         document.getElementById('forgot_password').classList.remove('hidden');
         document.getElementById('register_new_user').classList.add('hidden');
@@ -148,6 +151,7 @@
     }
     
     window.registerNewUserShow = function(){
+        stopSpinner();
         document.getElementById('email_password_login').classList.add('hidden');
         document.getElementById('forgot_password').classList.add('hidden');
         document.getElementById('register_new_user').classList.remove('hidden');
@@ -160,6 +164,7 @@
     }
 
     window.mfaPhoneShow = function(){
+        stopSpinner();
         document.getElementById('email_password_login').classList.add('hidden');
         document.getElementById('forgot_password').classList.add('hidden');
         document.getElementById('register_new_user').classList.add('hidden');
@@ -172,6 +177,7 @@
     }
 
     window.mfaCodeShow = function(){
+        stopSpinner();
         document.getElementById('email_password_login').classList.add('hidden');
         document.getElementById('forgot_password').classList.add('hidden');
         document.getElementById('register_new_user').classList.add('hidden');
@@ -186,12 +192,15 @@
     // login functions.
     window.loginWithEmailPassword = function () {
 
+        startSpinner();
+
         const email = document.getElementById('email_password_login_email').value;
         const password = document.getElementById('email_password_login_password').value;
         if(!check_username_password(email, password)) return;
 
         signInWithEmailAndPassword(auth, email, password)
             .catch((error) => {
+                stopSpinner();
                 if (error.code == 'auth/multi-factor-auth-required') {
 
                     // The user is a multi-factor user. Second factor challenge is required.
@@ -202,13 +211,15 @@
                     showAlert("error", "Invalid email or password. Please try again.");
 
                 } else {
+                    showAlert("error", "An error occurred. Please contact support. Error code: " + error.code);
                     console.log(error)
         }});
 
     }
 
-    window.loginWithGoogle = function() {        
-        signInWithPopup(auth, new GoogleAuthProvider())
+    window.loginWithGoogle = function() {
+        startSpinner();
+        signInWithPopup(auth, new GoogleAuthProvider())        
         .catch(error => {
             if (error.code == 'auth/multi-factor-auth-required') {
                     
@@ -220,13 +231,16 @@
                 showAlert("error", "Not a user. Please contact Support.");
                 
             } else {
+                showAlert("error", "An error occurred. Please contact support. Error code: " + error.code);
                 console.log(error)
             }
         });
     }
 
-    // MFA
+    // MFA    
     window.sendMfaCode = async () => {
+
+        startSpinner();
 
         // if there is a resolver, we don't have a user yet. 
         if(window.resolver){
@@ -246,7 +260,7 @@
 
         } else {
         
-            multiFactor(user).getSession().then(function (multiFactorSession) {
+            multiFactor(auth.currentUser).getSession().then(function (multiFactorSession) {
                 
                 const phoneInfoOptions = {
                     phoneNumber: '+1' + document.getElementById('mfa_phone').value,
@@ -287,6 +301,8 @@
     // https://firebase.google.com/docs/auth/web/multi-factor#web_26
     window.submitMfaCode = async () => {
 
+        startSpinner();
+
         const mfa_code = document.getElementById('mfa_code').value;
         const cred = PhoneAuthProvider.credential(window.mfa_verificationId, mfa_code);
         const multiFactorAssertion = PhoneMultiFactorGenerator.assertion(cred);
@@ -300,20 +316,21 @@
         // otherwise, this is a new enrollment.
         } else {
 
-            return multiFactor(user).enroll(multiFactorAssertion).then(() => {
-                Shiny.setInputValue('mfa_verification', {mfa_verificationId: window.mfa_verificationId, mfa_code: mfa_code})
+            return multiFactor(auth.currentUser).enroll(multiFactorAssertion).then(() => {
+                console.log('submitMfaCode: MFA enrolled');
+                Shiny.setInputValue('mfa_verification', {mfa_verificationId: window.mfa_verificationId, mfa_code: mfa_code, user: auth.currentUser})
             }).catch((error) => {
                 
                 if(error.code === 'auth/second-factor-already-in-use'){
                     // this means we accidentally followed the enroll flow. 
-                    // log out and try again. 
+                    // log out and try again.
                     showAlert("warning", "This account already has multi-factor authentication enabled, but a new enrollment was requested by the app. Sorry! Please reload the page and try again, it should work the next time.");
                     auth.signOut();
                     window.recaptchaVerifier.clear();
                     window.location.reload();
                 } else {
                     console.log(error);
-                    showAlert("error", "Verification failed. Please try again.")
+                    showAlert("error", "Verification failed. Please try again. Error code: " + error.code);
                 }
             });
 
@@ -323,6 +340,8 @@
 
     // new user registration.
     window.registerNewUser = function() {
+
+        startSpinner();
 
         // new user flow:
         //   validate username/password.
@@ -344,6 +363,7 @@
                     'new_user_register', 
                     [token, username, password]
                 );
+                // server will send an alert which will close the spinner.
             })
             .catch(error => {
                 showAlert("error", 'Failed reCAPTCHA');
@@ -352,6 +372,8 @@
     }
 
     window.forgotPassword = function() {
+
+        startSpinner();
 
         const email = document.getElementById('forgot_password_email').value;      
         

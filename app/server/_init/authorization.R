@@ -83,7 +83,7 @@ send_confirmation = function(idToken, alert = TRUE){
     
     if(!is.null(result$error)){
         warning(result$error$message)
-        session$sendCustomMessage('user_warning', paste0('Failed to send email confirmation. Please try again. ', result$error$message))
+        session$sendCustomMessage('user_warning', paste0('Failed to send confirmation email. Email confirmation is required. Please try again. ', result$error$message))
         return()
     }
       
@@ -93,8 +93,6 @@ send_confirmation = function(idToken, alert = TRUE){
 observeEvent(input$user_logout, {
     authorized(FALSE)
 })
-
-ok_to_show_mfa = FALSE
 
 # anytime we set authorized to FALSE, we also want to clear the login form to allow another attempt.
 not_authorized = function(){
@@ -131,18 +129,18 @@ observeEvent(input$user_login, {
         return()
     }
 
-    # if MFA is required, confirm the user has it set up.
-    # we only check this if an initial login attempt has already been made.
-    if(is.null(user$mfaInfo) || length(user$mfaInfo) == 0){
-      print(ok_to_show_mfa)
-      if(ok_to_show_mfa){
-        session$sendCustomMessage('show_mfa', 'show_mfa')
-      } else {
-        ok_to_show_mfa <<- TRUE
-        session$sendCustomMessage('log_user_out', 'log_user_out') # we need to log the user out to allow another attempt. 
-      }
-      not_authorized()
-      return()
+    # this part only applies if MFA is required.
+    if(auth_methods$mfa_sms){
+
+        # if a user has set up MFA, google will not send an idToken back until they have successfully authenticated with MFA.
+        # however, it wil send a token before they enroll. so we have to check here to confirm enrollment.
+        # if MFA is required, confirm the user has it set up. if they haven't, they aren't authorized.
+        if(is.null(user$mfaInfo) || length(user$mfaInfo) == 0){
+            session$sendCustomMessage('show_mfa', 'show_mfa')
+            not_authorized()
+            return()
+        }
+
     }
 
     # if we got this far, the user is authorized.
@@ -216,8 +214,37 @@ observeEvent(input$new_user_register, {
 
     # the user will need to verify their email address before being authorized. 
     send_confirmation(result$idToken, alert = FALSE)
-    session$sendCustomMessage('user_success', 'A verification email has been sent. Please click the link in the email to verify your email address.')
+    session$sendCustomMessage('user_success', list(message = 'A verification email has been sent. Please click the link in the email to verify your email address.', doreload = TRUE))
     updateTextInput(session, "new_user_register", value = NULL)
     authorized(FALSE)
+
+})
+
+observeEvent(input$mfa_verification, {
+  
+  # validate the access token.
+  verified_user = verify_idToken(input$mfa_verification$user$stsTokenManager$accessToken)
+  if(is.null(verified_user) || is.null(verified_user$email)){
+    not_authorized()
+    return()
+  }
+  
+  # if the user's email has not been verified, send the user a confirmation email.
+  if(!input$mfa_verification$user$emailVerified){
+    send_confirmation(input$user_login[1])
+    not_authorized()
+    return()
+  }
+  
+  # validate the MFA user is the same as the logged in user.
+  if(verified_user$email != input$mfa_verification$user$email){
+    session$sendCustomMessage('user_error', 'MFA verification error.')
+    not_authorized()
+    return()
+  }
+  
+  # by now, we've validate the mfa verification (which includes the user information) and can authorize the user.
+  session$sendCustomMessage('stop_spinner', 'close_spinner')
+  authorized(TRUE)
 
 })
