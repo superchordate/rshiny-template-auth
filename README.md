@@ -55,24 +55,37 @@ If you would like to allow users to log in with email (recommended):
 
 If you would like to use the "Login with Google" feature, follow the steps below. It's complicated, but I'd recommend attempting it since it's a nice option for users. Otherwise, skip to the next section.
 
-* Create Oauth Consent Screen: The steps from Google on this aren't super clear, so use these:
+* Create Oauth App: The steps from Google on this aren't super clear, so use these:
   - Go to https://console.cloud.google.com/apis/credentials. Notice how the "OAuth 2.0 Client IDs" section is empty. We need to add one.
   - Click "Create Credentials" and select "OAuth Client ID"
-  - Click "Configure Consent Screen" on the right.
-  - Select User Type = "External" and "Create".
-  - Oauth Consent Screen: Fill in the required fields as best you can. In production, you'll want to carefully go through this. For now, the values aren't that important. Save and Continue.
-  - Scopes: Leave blank for now. Save and Continue.
-  - Test users: Add yourself as a test user.
+  - Click "Configure Consent Screen" on the right. 
+  - This will take you to the "Create branding" page. Click "Get Started"
+  - Choose an app name ("test" is OK for now) and set your email as the "User support email". Click "NEXT".
+  - Select "External" and click "NEXT".
+  - Enter your email and click "NEXT".
+  - Review the linked Google API Services User Data Policy, check the box if you agree to be bound by it, and click "CONTINUE".
+  - Click "CREATE".
+  - Later, come back to https://console.cloud.google.com/auth/branding and add your home page, privacy policy link, and terms of service link.
 
-* Create Oauth Client: Now we can create the actual client.
-  - Click "BACK TO DASHBOARD" at the bottom and click "Credentials" (expand the left sidebar).
-  - Click "Create Credentials" and select "OAuth Client ID"
-  - Select Application Type = "Web application" and enter a name.
-  - Click "Create". The "OAuth client created" will pop up. Copy the Client ID and Client Secret to Notepad, you'll need both shortly. You can access them later by selecting your Oauth client at https://console.cloud.google.com/apis/credentials.
+* Create OAuth Client:
+  - Go to https://console.cloud.google.com/auth/overview.
+  - Click "CREATE OAUTH CLIENT" at the right. 
+  - If you see don't see the "Create OAuth client ID" screen, click "Configure Consent Screen" on the right. 
+  - Select "Application Type" = "Web application".
+  - Use the default "Name" or choose one ("test" is fine).
+  - We'll come back to fill this in later. For now, click "CREATE".
 
-* Set up Google Login.
+* Add OAuth Test User:
+  - Go to https://console.cloud.google.com/auth/audience.
+  - Under "Test users", click "+ ADD USERS".
+  - Add your email address, and the email of anyone else that needs access during testing.
+  - Click "SAVE".
+
+* Set up Google Login:
   - Go to https://console.cloud.google.com/customer-identity/providers and click "Add Provider" and select Google. 
-  - Paste in your Client ID and Client Secret and click Save. 
+  - In a different window, open https://console.cloud.google.com/apis/credentials  and click your OAuth 20 Client ID.
+  - Copy and paste the Client ID and Client Secret into the Google Add Provider page.
+  - Click "SAVE".
 
 Create .env file
 
