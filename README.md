@@ -37,14 +37,16 @@ To use this project:
 
 ## Identity Platform Setup
 
+Settings must be manually lined up in Identity Platform as well as global.R which controls the UI and some limited server-side checks.
+
 * Initialize Project on Google Cloud Platform (GCP): Create a new project to make it easier to delete all the resources when you are finished testing.
   - Follow the steps at https://developers.google.com/workspace/guides/create-project including setting up a billing account. Don't worry, you won't get charged until you hit 50,000 monthly active users<sup>[1](https://cloud.google.com/identity-platform/pricing)</sup>. You can set up [billing alerts](https://cloud.google.com/billing/docs/how-to/budgets) to be more sure you won't see high billing. 
   - Go to https://console.cloud.google.com/customer-identity/providers and click "Enable Identity Platform."
 
 * Disable new user registration (optional):
   - If you can manage users yourself by adding them in Identity Platform, that is more secure than allowing new registration via the site. This template will use reCAPTCHA to try and reduce registrations by bots, but it is not difficult for bots to get around this restriction. 
-  - Click Settings (expand the left sidebar) > Un-check "Enable create (sign-up)", Un-check "Enable delete" > Click SAVE. 
-  - This will ensure users can only be modified by you, using the GCP console. Also: at global.R, set allow_register_new_user = FALSE.
+  - Click Settings (expand the left sidebar) > Un-check "Enable create (sign-up)", Un-check "Enable delete" > Click SAVE. If you don't do this, new users can register through Log In with Google even if you have allow_register_new_user = FALSE in global.R.
+  - This will ensure users can only be modified by you, using the GCP console.
 
 If you would like to allow users to log in with email (recommended): 
 
@@ -72,10 +74,9 @@ If you would like to use the "Login with Google" feature, follow the steps below
   - Go to https://console.cloud.google.com/customer-identity/providers and click "Add Provider" and select Google. 
   - Paste in your Client ID and Client Secret and click Save. 
 
-Now we'll set up the R Shiny app. 
+Create .env file
 
-* Create your `.env` file. It will hold the keys your app needs.
-  - Create an empty file in the `app/` folder called `.env` and copy in the text below:
+* Create an empty file in the `app/` folder called `.env` and copy in the text below:
 
 ```
 PUBLIC_FIREBASE_API_KEY=paste_key_here
@@ -86,22 +87,32 @@ PUBLIC_FIREBASE_AUTH_DOMAIN=paste_domain_here
   - Go to https://console.cloud.google.com/customer-identity/providers and click "APPLICATION SETUP DETAILS" on the right. 
   - Copy the `apiKey` and `authDomain` to replace `paste_key_here` and `paste_domain_here`, respectively. Don't include any `'` or `"`.
 
-* Authorize the local R Shiny development domain.
-  - Run the app and note the URL. For me it is "http://127.0.0.1:4201/?".
-  - Go to https://console.cloud.google.com/customer-identity/providers and click Settings (expand the left sidebar).
-  - Click "SECURITY". We need to authorize the domain part of this: 127.0.0.1.
-  - Click 'ADD DOMAIN", enter "127.0.0.1" (or the value you see) and "SAVE".
+If you would like to use two-factor authentication (2FA/MFA) with SMS/text:
 
-* Authorize the Oauth client for your Firebase app. Only necessary if you are using Sign In with Google.
-  - Go to https://console.cloud.google.com/apis/credentials and select your Oauth client. 
-  - Under "Authorized redirect URIs", click "+ ADD URI".
-  - Enter your the auth handler URL for you `authDomain`. Take `https://authDomain/__/auth/handler` and replace "authDomain" with your `authDomain`.
+* Go to https://console.cloud.google.com/customer-identity and click on MFA (expand left sidebar).
+* Click "Enable" 
+* Note the options here. You can customize your SMS here. 
+* When you are ready, click "Save". Or, just click it to accept defaults. You can come back to change it later.
+* Follow steps below in the section "reCAPTCHA Setup". Google requires reCAPTCHA checks before any SMS send.
 
-If you aren't using email, or aren't using Log In with Google, set the appropriate value to `FALSE` at `app/server.R` line 4. 
+Authorize the local R Shiny development domain.
+
+  * Run the app and note the URL. For me it is "http://127.0.0.1:4201/?".
+  * Go to https://console.cloud.google.com/customer-identity/providers and click Settings (expand the left sidebar).
+  * Click "SECURITY". We need to authorize the domain part of this: 127.0.0.1.
+  * Click 'ADD DOMAIN", enter "127.0.0.1" (or the value you see) and "SAVE".
+
+Authorize the Oauth client for your Firebase app. Only necessary if you are using Sign In with Google.
+
+  * Go to https://console.cloud.google.com/apis/credentials and select your Oauth client. 
+  * Under "Authorized redirect URIs", click "+ ADD URI".
+  * Enter your the auth handler URL for you `authDomain`. Take `https://authDomain/__/auth/handler` and replace "authDomain" with your `authDomain`.
+
+If you are not using Email / Password Login, Log In with Google, New User Registration, or MFA set the appropriate values to `FALSE` at `app/global.R` lines 12-17. 
 
 You are done setting up Identity Platform! Celebrate with a latte. :coffee:
 
-Then, continue by running the app in RStudio. You can now perform all the login operations (assuming you are one of the authorized Test Users)! 
+Then, continue by running the app in RStudio. You can now perform all the login operations! (assuming you are one of the authorized Test Users, if using Log In with Google)
 
 
 ## reCAPTCHA Setup
@@ -112,9 +123,9 @@ This verification is free for up to 10,000 assessments per organization, and sup
 
 I've implemented a relatively simple check during user registration. A future enhancement may include checks at every login. There are a lot of different ways this can be used. See https://cloud.google.com/recaptcha/docs/best-practices-oat for a fairly comprehensive list of defense strategies. 
 
-_These steps haven't been fully vetted by me so you might need some troubleshooting. If you run into problems, please submit a PR to fix the instructions._ 
+_These steps haven't been fully vetted by me so you might need some troubleshooting. If you run into problems, please let me know and/or submit a PR to fix the instructions._ 
 
-After following Identity Provider setup steps:
+After following Identity Provider setup steps up to "If you would like to use two-factor authentication (2FA/MFA) with SMS/text":
 
 * Enable reCAPTCHA: 
   - Go to https://console.cloud.google.com/security/recaptcha and click "Enable reCAPTCHA".
