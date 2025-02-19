@@ -1,7 +1,8 @@
 <div id="login_template" class="w-full pt-12 mt-12 flex justify-center"><div class="bg-white p-8 rounded-lg shadow-md w-96">
-    <h2 class="text-2xl font-bold mb-6 text-center text-gray-800">Login</h2>
     
-    <div>
+    {{if(auth_methods$email) HTML('<h2 class="text-2xl font-bold mb-6 text-center text-gray-800">Login</h2>')}}
+    
+    <div class = 'grid grid-cols-1 gap-4'>
         {{if(auth_methods$email) HTML('
             <!-- email / password login -->
             <form id="email_password_login">
@@ -50,8 +51,6 @@
                 <input type="submit" value="Register" class="cursor-pointer bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline w-full mt-6" 
                     onclick="registerNewUser()">
             </form>
-
-            </div>
         ')}}
 
         <!-- MFA -->
@@ -88,7 +87,7 @@
         <div class="flex flex-col gap-4" id="loginWithGoogle_block">
             <button type="button" id="loginWithGoogle"
                 onclick="loginWithGoogle()"
-                class="mt-4 cursor-pointer flex items-center justify-center gap-2 bg-white border border-gray-300 text-gray-700 font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline w-full hover:bg-gray-50">
+                class="cursor-pointer flex items-center justify-center gap-2 bg-white border border-gray-300 text-gray-700 font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline w-full hover:bg-gray-50">
                 <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxOCIgaGVpZ2h0PSIxOCIgdmlld0JveD0iMCAwIDQ4IDQ4Ij48cGF0aCBmaWxsPSIjRkZDMTA3IiBkPSJNNDMuNjExLDIwLjA4M0g0MlYyMEgyNHY4aDExLjMwM2MtMS42NDksNC42NTctNi4wOCw4LTExLjMwMyw4Yy02LjYyNywwLTEyLTUuMzczLTEyLTEyYzAtNi42MjcsNS4zNzMtMTIsMTItMTJjMy4wNTksMCw1Ljg0MiwxLjE1NCw3Ljk2MSwzLjAzOWw1LjY1Ny01LjY1N0MzNC4wNDYsNi4wNTMsMjkuMjY4LDQsMjQsNEMxMi45NTUsNCw0LDEyLjk1NSw0LDI0YzAsMTEuMDQ1LDguOTU1LDIwLDIwLDIwYzExLjA0NSwwLDIwLTguOTU1LDIwLTIwQzQ0LDIyLjY1OSw0My44NjIsMjEuMzUsNDMuNjExLDIwLjA4M3oiPjwvcGF0aD48cGF0aCBmaWxsPSIjRkYzRDAwIiBkPSJNNi4zMDYsMTQuNjkxbDYuNTcxLDQuODE5QzE0LjY1NSwxNS4xMDgsMTguOTYxLDEyLDI0LDEyYzMuMDU5LDAsNS44NDIsMS4xNTQsNy45NjEsMy4wMzlsNS42NTctNS42NTdDMzQuMDQ2LDYuMDUzLDI5LjI2OCw0LDI0LDRDMTYuMzE4LDQsOS42NTYsOC4zMzcsNi4zMDYsMTQuNjkxeiI+PC9wYXRoPjxwYXRoIGZpbGw9IiM0Q0FGNTAiIGQ9Ik0yNCw0NGM1LjE2NiwwLDkuODYtMS45NzcsMTMuNDA5LTUuMTkybC02LjE5LTUuMjM4QzI5LjIxMSwzNS4wOTEsMjYuNzE1LDM2LDI0LDM2Yy01LjIwMiwwLTkuNjE5LTMuMzE3LTExLjI4My03Ljk0NmwtNi41MjIsNS4wMjVDOS41MDUsMzkuNTU2LDE2LjIyNyw0NCwyNCw0NHoiPjwvcGF0aD48cGF0aCBmaWxsPSIjMTk3NkQyIiBkPSJNNDMuNjExLDIwLjA4M0g0MlYyMEgyNHY4aDExLjMwM2MtMC43OTIsMi4yMzctMi4yMzEsNC4xNjYtNC4wODcsNS41NzFjMC4wMDEtMC4wMDEsMC4wMDItMC4wMDEsMC4wMDMtMC4wMDJsNi4xOSw1LjIzOEMzNi45NzEsMzkuMjA1LDQ0LDM0LDQ0LDI0QzQ0LDIyLjY1OSw0My44NjIsMjEuMzUsNDMuNjExLDIwLjA4M3oiPjwvcGF0aD48L3N2Zz4=" 
                     alt="Google logo" 
                     class="w-6 h-6">
@@ -97,18 +96,20 @@
         </div>
         ')}}
 
-        <!-- bottom buttons: forgot password/register new user -->
-        {{if(auth_methods$email) HTML(paste0(c('
-            <div id="forgot_register_block" class="mt-4 space-4">
-                <button class="cursor-pointer text-gray-600 hover:text-gray-800 text-sm mb-2 underline" onclick="forgotPasswordShow()" id="forgotPassword_button">
-                    Forgot password?
-                </button>
-                <br/>', if(auth_methods$allow_register_new_user){ '
-                <button class="cursor-pointer text-gray-600 hover:text-gray-800 text-sm underline" onclick="registerNewUserShow()" id="newUser_button">
-                    Register as a new user.
-                </button>' }, '
-            </div>
-        ')))}}
+    </div>
+
+    <!-- bottom buttons: forgot password/register new user -->
+    {{if(auth_methods$email) HTML(paste0(c('
+        <div id="forgot_register_block" class="mt-4 space-4">
+            <button class="cursor-pointer text-gray-600 hover:text-gray-800 text-sm mb-2 underline" onclick="forgotPasswordShow()" id="forgotPassword_button">
+                Forgot password?
+            </button>
+            <br/>', if(auth_methods$allow_register_new_user){ '
+            <button class="cursor-pointer text-gray-600 hover:text-gray-800 text-sm underline" onclick="registerNewUserShow()" id="newUser_button">
+                Register as a new user.
+            </button>' }, '
+        </div>
+    ')))}}
 </div>
 
     <div id="recaptcha-container"></div>
@@ -167,6 +168,7 @@
     window.mfaPhoneShow = function(){
         if(window.resolver){
             // if we have a resolver, the user already has MFA set up, we don't need to ask for a phone number.
+            // skip to sending the code.
             sendMfaCode();
         } else {
             stopSpinner();

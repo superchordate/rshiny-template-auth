@@ -176,6 +176,12 @@ observeEvent(input$forgot_password, {
 # Leaving code from my attempt to add a registration flow here, in case it does come in handy.
 observeEvent(input$new_user_register, {
 
+    if(!auth_methods$allow_register_new_user){
+        session$sendCustomMessage('user_error', 'New user registration is not allowed.')
+        not_authorized()
+        return()
+    }
+
     if(is.null(input$new_user_register)) return()
 
     if(!verify_recaptcha(input$forgot_password[1])){
@@ -221,6 +227,12 @@ observeEvent(input$new_user_register, {
 })
 
 observeEvent(input$mfa_verification, {
+
+  if(!auth_methods$mfa_sms){
+    session$sendCustomMessage('user_error', 'MFA verification was requested but this application does not have MFA enabled.')
+    not_authorized()
+    return()
+  }
   
   # validate the access token.
   verified_user = verify_idToken(input$mfa_verification$user$stsTokenManager$accessToken)
