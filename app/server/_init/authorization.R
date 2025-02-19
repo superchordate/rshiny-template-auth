@@ -45,15 +45,19 @@ verify_recaptcha = function(recaptcha_token){
 
     # Before proceeding, you must authenticate with reCAPTCHA. API requests to reCAPTCHA will fail until authentication steps are complete.
     # See https://cloud.google.com/recaptcha/docs/authentication.
-    if(Sys.getenv("RECAPTCHA_API_KEY") == "") stop('RECAPTCHA_API_KEY not set in .env file. Please see the README for setup instructions.')
-    if(Sys.getenv("PUBLIC_RECAPTCHA_SITE_KEY") == "") stop('PUBLIC_RECAPTCHA_SITE_KEY not set in .env file. Please see the README for setup instructions.')
+
+    # I'm testing a new method using the Firebase API key. It seems to work but I'm leaving the prior approach here for now.
+    # if(Sys.getenv("RECAPTCHA_API_KEY") == "") stop('RECAPTCHA_API_KEY not set in .env file. Please see the README for setup instructions.')
+    # if(Sys.getenv("PUBLIC_RECAPTCHA_SITE_KEY") == "") stop('PUBLIC_RECAPTCHA_SITE_KEY not set in .env file. Please see the README for setup instructions.')
 
     response = POST(
-        url = paste0("https://recaptchaenterprise.googleapis.com/v1/projects/testauth-450202/assessments?key=", Sys.getenv("RECAPTCHA_API_KEY")),
+        # url = paste0("https://recaptchaenterprise.googleapis.com/v1/projects/testauth-450202/assessments?key=", Sys.getenv("RECAPTCHA_API_KEY")),
+        url = paste0("https://recaptchaenterprise.googleapis.com/v1/projects/testauth-450202/assessments?key=", Sys.getenv("PUBLIC_FIREBASE_API_KEY")),
         body = toJSON(list(event = list(
             "token" = recaptcha_token,
             "expectedAction" = "REGISTER",
-            "siteKey" = Sys.getenv("PUBLIC_RECAPTCHA_SITE_KEY")
+            # "siteKey" = Sys.getenv("PUBLIC_RECAPTCHA_SITE_KEY")
+            "siteKey" = Sys.getenv("PUBLIC_FIREBASE_API_KEY")
         )), auto_unbox = TRUE),
         encode = "json",
         content_type_json()

@@ -118,10 +118,16 @@ If you would like to set up reCAPTCHA to prevent some bot activity, follow the s
 * This template uses invisible reCAPTCHA, which mostly runs in the background but will pop up asking the user to click images if there is any unusual activity.
 
 * Enable reCAPTCHA: 
-  - Go to https://console.cloud.google.com/security/recaptcha and click "Enable reCAPTCHA".
+  - Go to https://console.cloud.google.com/security/recaptcha and click "ENABLE".
   - Click "+ Create Key"
-  - Go through creation steps. 
-  - Add the ID to `.env` as `PUBLIC_RECAPTCHA_SITE_KEY`.
+  - Choose a "Display name". "test" is fine for now.
+  - Choose "platform type" = "Website".
+  - Click "Add a domain" and enter your R Shiny domain (see "How to Find My R Shiny Dev Domain" below).
+
+<!-- These steps pending removal during testing of using the Firebase API key instead of creating separate reCAPTCHA keys.
+
+  - Click "Create key".
+  - Note your ID now at the top of the screen. Copy it and add the it to `.env` as `PUBLIC_RECAPTCHA_SITE_KEY`.
 
 * Create a Google API Key for the server to access your project's reCAPTCHA. 
   - Go to https://console.cloud.google.com/apis/credentials
@@ -130,16 +136,15 @@ If you would like to set up reCAPTCHA to prevent some bot activity, follow the s
   - Click Show key, copy into `.env` as `RECAPTCHA_API_KEY`
   - Click Close and Save
 
-* This may require extra setup when publishing to the web. The server must be authenticated with reCAPTCHA and your google project. I expect this will be automatic if using Google Cloud Run on the same project, but it might be tricky on other publishing platforms. See https://cloud.google.com/recaptcha/docs/authentication for more information. 
+* This may require extra setup when publishing to the web. The server must be authenticated with reCAPTCHA and your google project. I expect this will be automatic if using Google Cloud Run on the same project, but it might be tricky on other publishing platforms. See https://cloud.google.com/recaptcha/docs/authentication for more information.  
 
-**TODO: these steps may not be necessary when importing directly, and it only really makes sense to add it for MFA since we aren't allowing user registration. **
+-->
 
 Authorize the local R Shiny development domain.
 
-  * Run the app using RStudio and note the URL. For me it is "http://127.0.0.1:4201/?".
   * Go to https://console.cloud.google.com/customer-identity/settings.
-  * Click "SECURITY". We need to authorize the domain part of this: 127.0.0.1.
-  * Click 'ADD DOMAIN", enter "127.0.0.1" (or the value you see) and "SAVE".
+  * Click "SECURITY". 
+  * Click 'ADD DOMAIN" and enter your R Shiny domain (see "How to Find My R Shiny Domain" below).
 
 If you are using Log in With Google, authorize the Oauth client for your Firebase app:
 
@@ -155,7 +160,15 @@ You are done setting up Identity Platform! Celebrate with a latte. :coffee:
 Then, continue by running the app in RStudio. You can now perform all the login operations! (assuming you are one of the authorized Test Users, if using Log In with Google)
 
 
-## reCAPTCHA Setup
+## How to Find My R Shiny Domain
+
+This section assumes you are running R Shiny locally.
+
+* Run the app using RStudio or your preferred method.
+* Note the URL. For me it is "http://127.0.0.1:4201/?".
+* The domain is the part in the middle, in this case "127.0.0.1"
+* If on the web, your domain might be something like "https://shinydemo.brycechamberlainllc.com" in which case the domain is "brycechamberlainllc.com".
+
 
 ## Multi-Factor Authentication
 
@@ -168,16 +181,24 @@ This template makes it easy to add multi-factor authentication via SMS. MFA will
 * Add your phone number under "Phone numbers for testing (optional)"
 * Go to https://console.firebase.google.com/ > Build > Authentication > Settings > SMS region policy > Allow United States > Save. 
 
+
 ## On the Web
 
 _Disclaimer: I can't make any guarantees that the authorization here is 100% secure. We all must be responsible for our own security, so be sure to study up and review this code, or consult an expert, if you decide to use this template in production._
 
-When you move this to the web, you'll need to add the domain to https://console.cloud.google.com/customer-identity/providers > Settings > Security > Authorized Domains, and **remove localhost and 127.0.0.1**.
+When you move this to the web, you'll need to replace your dev domain with your prod domain. It is **CRITICAL** to remove the dev domain from anywhere you added it. Otherwise, someone else could use your public Firebase keys to run Firebase operations from their local development environments. They wouldn't be able to do anything you have disallowed in Identity Provider settings, but this would be a major security risk either way. If you would like a dev environment, use a different GCP project and keep your Firebase API keys very secret! 
+
+Here are the places where it might need to be replaced. 
+
+* https://console.cloud.google.com/customer-identity/providers > Settings > Security > Authorized Domains
+* https://console.cloud.google.com/apis/credentials > OAuth 2.0 Client ID > Authorized JavaScript origins, Authorized redirect URIs.
+* https://console.cloud.google.com/security/recaptcha > Key details > Edit key > Domain list.
+
+**Or, even better, start a new project and use your public domain instead of your dev domain.** That way you can be sure the project doesn't have the local domain anywhere.
 
 I'm hoping this will work on just about any platform, since it runs entirely in R on the server and JS on the front-end. Both will be available on any platform that can run an R Shiny app. 
 
 On the web, you'll be gathering sensitive data like email and phone numbers for MFA. You should have a Privacy Policy and Terms of Service set up. You can add this information to your Google Cloud project at https://console.cloud.google.com/auth/branding.
-
 
 ## Design Notes
 

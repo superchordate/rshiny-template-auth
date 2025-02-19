@@ -13,8 +13,8 @@ auth_methods = list(
     email = TRUE, # email and password registration, login, forgot password.
     allow_register_new_user = TRUE, # allow new users to register. 
     google = TRUE, # log in with google account.
-    invisible_recaptcha = FALSE, # use invisible recaptcha to prevent some bot activity.
-    mfa_sms = FALSE # require two-factor authentication by SMS.
+    invisible_recaptcha = TRUE, # use invisible recaptcha to prevent some bot activity.
+    mfa_sms = TRUE # require two-factor authentication by SMS.
 )
 
 if(auth_methods$mfa_sms && !auth_methods$invisible_recaptcha) stop('MFA requires invisible recaptcha. Please enable it in the auth_methods list.')
