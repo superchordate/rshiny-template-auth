@@ -39,6 +39,8 @@ To use this project:
 
 Settings must be manually lined up in Identity Platform as well as global.R which controls the UI and some limited server-side checks.
 
+*During these steps, you might see a pop-up that says "Cloud Functions API has not been used in project testauth-451418 before or it is disabled." You can ignore this and click "CLOSE".
+
 * Initialize Project on Google Cloud Platform (GCP): Create a new project to make it easier to delete all the resources when you are finished testing.
   - Follow the steps at https://developers.google.com/workspace/guides/create-project including setting up a billing account. Don't worry, you won't get charged until you hit 50,000 monthly active users<sup>[1](https://cloud.google.com/identity-platform/pricing)</sup>. You can set up [billing alerts](https://cloud.google.com/billing/docs/how-to/budgets) to be more sure you won't see high billing. 
   - Go to https://console.cloud.google.com/customer-identity/providers and click "Enable Identity Platform."
@@ -83,11 +85,11 @@ If you would like to use the "Login with Google" feature, follow the steps below
 
 * Set up Google Login:
   - Go to https://console.cloud.google.com/customer-identity/providers and click "Add Provider" and select Google. 
-  - In a different window, open https://console.cloud.google.com/apis/credentials  and click your OAuth 20 Client ID.
+  - In a different window, open https://console.cloud.google.com/apis/credentials and click your OAuth 20 Client ID.
   - Copy and paste the Client ID and Client Secret into the Google Add Provider page.
   - Click "SAVE".
 
-Create .env file
+Create .env file:
 
 * Create an empty file in the `app/` folder called `.env` and copy in the text below:
 
@@ -100,45 +102,20 @@ PUBLIC_FIREBASE_AUTH_DOMAIN=paste_domain_here
   - Go to https://console.cloud.google.com/customer-identity/providers and click "APPLICATION SETUP DETAILS" on the right. 
   - Copy the `apiKey` and `authDomain` to replace `paste_key_here` and `paste_domain_here`, respectively. Don't include any `'` or `"`.
 
+* Even though these are public keys, the .env file will be ignored by Git so your keys don't get pushed to GitHub. See more about key security below under heading "On the Web".
+
 If you would like to use two-factor authentication (2FA/MFA) with SMS/text:
 
-* Go to https://console.cloud.google.com/customer-identity and click on MFA (expand left sidebar).
+* Go to https://console.cloud.google.com/customer-identity/mfa.
 * Click "Enable" 
-* Note the options here. You can customize your SMS here. 
+* Note the options here. You can customize your SMS here.
 * When you are ready, click "Save". Or, just click it to accept defaults. You can come back to change it later.
-* Follow steps below in the section "reCAPTCHA Setup". Google requires reCAPTCHA checks before any SMS send.
 
-Authorize the local R Shiny development domain.
+If you would like to set up reCAPTCHA to prevent some bot activity, follow the steps below. Google requires reCAPTCHA checks before any SMS send, so you must follow these steps if you want to use MFA.
 
-  * Run the app and note the URL. For me it is "http://127.0.0.1:4201/?".
-  * Go to https://console.cloud.google.com/customer-identity/providers and click Settings (expand the left sidebar).
-  * Click "SECURITY". We need to authorize the domain part of this: 127.0.0.1.
-  * Click 'ADD DOMAIN", enter "127.0.0.1" (or the value you see) and "SAVE".
+* reCAPTCHA verification is free for up to 10,000 assessments per organization, and super cheap after that.<sup>[2](https://cloud.google.com/security/products/recaptcha?pricing&hl=en#pricing)</sup> You can be alerted if the reCAPTCHA starts getting hit excessively. See [this forum post](https://stackoverflow.com/questions/78450805/monitoring-and-alerts-configuration-for-google-recaptcha-v3-enterprise-edition).
 
-Authorize the Oauth client for your Firebase app. Only necessary if you are using Sign In with Google.
-
-  * Go to https://console.cloud.google.com/apis/credentials and select your Oauth client. 
-  * Under "Authorized redirect URIs", click "+ ADD URI".
-  * Enter your the auth handler URL for you `authDomain`. Take `https://authDomain/__/auth/handler` and replace "authDomain" with your `authDomain`.
-
-If you are not using Email / Password Login, Log In with Google, New User Registration, or MFA set the appropriate values to `FALSE` at `app/global.R` lines 12-17. 
-
-You are done setting up Identity Platform! Celebrate with a latte. :coffee:
-
-Then, continue by running the app in RStudio. You can now perform all the login operations! (assuming you are one of the authorized Test Users, if using Log In with Google)
-
-
-## reCAPTCHA Setup
-
-You may want to use reCAPTCHA to prevent bots from creating accounts. You can add an invisible check to verify users without any extra clicks. It requires some setup though.
-
-This verification is free for up to 10,000 assessments per organization, and super cheap after that.<sup>[2](https://cloud.google.com/security/products/recaptcha?pricing&hl=en#pricing)</sup> You can be alerted if the reCAPTCHA starts getting hit excessively. See [this forum post](https://stackoverflow.com/questions/78450805/monitoring-and-alerts-configuration-for-google-recaptcha-v3-enterprise-edition).
-
-I've implemented a relatively simple check during user registration. A future enhancement may include checks at every login. There are a lot of different ways this can be used. See https://cloud.google.com/recaptcha/docs/best-practices-oat for a fairly comprehensive list of defense strategies. 
-
-_These steps haven't been fully vetted by me so you might need some troubleshooting. If you run into problems, please let me know and/or submit a PR to fix the instructions._ 
-
-After following Identity Provider setup steps up to "If you would like to use two-factor authentication (2FA/MFA) with SMS/text":
+* This template uses invisible reCAPTCHA, which mostly runs in the background but will pop up asking the user to click images if there is any unusual activity.
 
 * Enable reCAPTCHA: 
   - Go to https://console.cloud.google.com/security/recaptcha and click "Enable reCAPTCHA".
@@ -156,6 +133,29 @@ After following Identity Provider setup steps up to "If you would like to use tw
 * This may require extra setup when publishing to the web. The server must be authenticated with reCAPTCHA and your google project. I expect this will be automatic if using Google Cloud Run on the same project, but it might be tricky on other publishing platforms. See https://cloud.google.com/recaptcha/docs/authentication for more information. 
 
 **TODO: these steps may not be necessary when importing directly, and it only really makes sense to add it for MFA since we aren't allowing user registration. **
+
+Authorize the local R Shiny development domain.
+
+  * Run the app using RStudio and note the URL. For me it is "http://127.0.0.1:4201/?".
+  * Go to https://console.cloud.google.com/customer-identity/settings.
+  * Click "SECURITY". We need to authorize the domain part of this: 127.0.0.1.
+  * Click 'ADD DOMAIN", enter "127.0.0.1" (or the value you see) and "SAVE".
+
+If you are using Log in With Google, authorize the Oauth client for your Firebase app:
+
+  * Go to https://console.cloud.google.com/apis/credentials and select your OAuth 2.0 Client ID. 
+  * Get your `authDomain`: In another tab, go to https://console.cloud.google.com/customer-identity/providers and click "APPLICATION SETUP DETAILS" on the right. 
+  * Go back to the Ouath tab. Under "Authorized redirect URIs", click "+ ADD URI".
+  * Enter your the auth handler URL for your `authDomain`. Take `https://{authDomain}/__/auth/handler` and replace "authDomain" with your `authDomain`. For example, if my `authDomain` is "testauth-451418.firebaseapp.com" then I'll enter the URI "https://testauth-451418.firebaseapp.com/__/auth/handler".
+
+If you are not using Email / Password Login, Log In with Google, New User Registration, or MFA set the appropriate values to `FALSE` at `app/global.R` lines 12-17. 
+
+You are done setting up Identity Platform! Celebrate with a latte. :coffee:
+
+Then, continue by running the app in RStudio. You can now perform all the login operations! (assuming you are one of the authorized Test Users, if using Log In with Google)
+
+
+## reCAPTCHA Setup
 
 ## Multi-Factor Authentication
 

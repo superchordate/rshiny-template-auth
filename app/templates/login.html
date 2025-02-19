@@ -123,44 +123,48 @@
         PhoneMultiFactorGenerator, getMultiFactorResolver, GoogleAuthProvider, signInWithPopup, sendPasswordResetEmail
     } from 'https://www.gstatic.com/firebasejs/11.2.0/firebase-auth.js'
 
-    window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {'size': 'invisible'});
+    if(window.invisible_recaptcha){ window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {'size': 'invisible'}); }
+
+    window.show = function(show){
+        let elements = [
+            'loginWithGoogle_block', 
+            'forgot_register_block', 
+            'email_password_login',
+            'forgot_password',
+            'register_new_user',
+            'mfa_form',
+            'mfa_code_form',
+        ]
+        elements.forEach(id => {
+            // some elements may not exist.
+            if(document.getElementById(id)){
+                if(show.includes(id)){
+                    document.getElementById(id).classList.remove('hidden');
+                } else {
+                    document.getElementById(id).classList.add('hidden');
+                }
+            }
+        });
+    }
 
     // visibility handlers.
     window.loginShow = function(){
         stopSpinner();
-        document.getElementById('email_password_login').classList.remove('hidden');
-        document.getElementById('forgot_password').classList.add('hidden');
-        document.getElementById('register_new_user').classList.add('hidden');
-        document.getElementById('mfa_form').classList.add('hidden');
-        document.getElementById('mfa_code_form').classList.add('hidden');
-        document.getElementById('loginWithGoogle_block').classList.remove('hidden');
-        document.getElementById('forgot_register_block').classList.remove('hidden');
+        show(['email_password_login', 'loginWithGoogle_block','forgot_register_block','email_password_login'])
         document.getElementById('email_password_login_email').focus();
         window.location.hash = '';
     }
     
     window.forgotPasswordShow = function(){
         stopSpinner();
-        document.getElementById('email_password_login').classList.add('hidden');
-        document.getElementById('forgot_password').classList.remove('hidden');
-        document.getElementById('register_new_user').classList.add('hidden');
-        document.getElementById('mfa_form').classList.add('hidden');
-        document.getElementById('mfa_code_form').classList.add('hidden');
-        document.getElementById('loginWithGoogle_block').classList.add('hidden');
-        document.getElementById('forgot_register_block').classList.add('hidden');
+        show(['forgot_password'])
         document.getElementById('forgot_password_email').focus();
         window.location.hash = 'reset';
     }
     
     window.registerNewUserShow = function(){
         stopSpinner();
-        document.getElementById('email_password_login').classList.add('hidden');
-        document.getElementById('forgot_password').classList.add('hidden');
-        document.getElementById('register_new_user').classList.remove('hidden');
-        document.getElementById('mfa_form').classList.add('hidden');
-        document.getElementById('mfa_code_form').classList.add('hidden');
-        document.getElementById('loginWithGoogle_block').classList.add('hidden');
-        document.getElementById('forgot_register_block').classList.add('hidden');
+        show(['register_new_user'])
         document.getElementById('register_new_user_email').focus();
         window.location.hash = 'register';
     }
@@ -172,13 +176,7 @@
             sendMfaCode();
         } else {
             stopSpinner();
-            document.getElementById('email_password_login').classList.add('hidden');
-            document.getElementById('forgot_password').classList.add('hidden');
-            document.getElementById('register_new_user').classList.add('hidden');
-            document.getElementById('mfa_form').classList.remove('hidden');
-            document.getElementById('mfa_code_form').classList.add('hidden');
-            document.getElementById('loginWithGoogle_block').classList.add('hidden');
-            document.getElementById('forgot_register_block').classList.add('hidden');
+            show(['mfa_form'])
             document.getElementById('mfa_phone').focus();
             window.location.hash = 'mfa';
         }
@@ -186,13 +184,7 @@
 
     window.mfaCodeShow = function(){
         stopSpinner();
-        document.getElementById('email_password_login').classList.add('hidden');
-        document.getElementById('forgot_password').classList.add('hidden');
-        document.getElementById('register_new_user').classList.add('hidden');
-        document.getElementById('mfa_form').classList.add('hidden');
-        document.getElementById('mfa_code_form').classList.remove('hidden');
-        document.getElementById('loginWithGoogle_block').classList.add('hidden');
-        document.getElementById('forgot_register_block').classList.add('hidden');
+        show(['mfa_code_form'])
         document.getElementById('mfa_code').focus();
         window.location.hash = 'mfa-confirm';
     }
@@ -365,18 +357,29 @@
             return;
         }
         
-        window.recaptchaVerifier.verify()
-            .then(token => {
-                Shiny.setInputValue(
-                    'new_user_register', 
-                    [token, username, password]
-                );
-                // server will send an alert which will close the spinner.
-            })
-            .catch(error => {
-                showAlert("error", 'Failed reCAPTCHA');
-                console.log(error);
-            });
+        if(window.invisible_recaptcha){
+            
+            window.recaptchaVerifier.verify()
+                .then(token => {
+                    Shiny.setInputValue(
+                        'new_user_register', 
+                        [token, username, password]
+                    );
+                    // server will send an alert which will close the spinner.
+                })
+                .catch(error => {
+                    showAlert("error", 'Failed reCAPTCHA');
+                    console.log(error);
+                });
+
+        } else {
+
+            Shiny.setInputValue(
+                'new_user_register', 
+                ['no_recaptcha', username, password]
+            );
+
+        }
     }
 
     window.forgotPassword = function() {
@@ -385,17 +388,29 @@
 
         const email = document.getElementById('forgot_password_email').value;      
         
-        window.recaptchaVerifier.verify()
-            .then(token => {
-                Shiny.setInputValue(
-                    'forgot_password', 
-                    [token, email]
-                );
-            })
-            .catch(error => {
-                showAlert("error", 'Failed reCAPTCHA');
-                console.log(error);
-            });
+        
+        if(window.invisible_recaptcha){
+            
+            window.recaptchaVerifier.verify()
+                .then(token => {
+                    Shiny.setInputValue(
+                        'forgot_password', 
+                        [token, email]
+                    );
+                })
+                .catch(error => {
+                    showAlert("error", 'Failed reCAPTCHA');
+                    console.log(error);
+                });
+
+        } else {
+
+            Shiny.setInputValue(
+                'forgot_password', 
+                ['no_recaptcha', email]
+            );
+
+        }
 
     }
 

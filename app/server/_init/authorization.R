@@ -40,8 +40,13 @@ verify_idToken = function(idToken){
 
 verify_recaptcha = function(recaptcha_token){
 
+    # skip the check if the app is not using recaptcha.
+    if(!auth_methods$invisible_recaptcha) return(TRUE)
+
     # Before proceeding, you must authenticate with reCAPTCHA. API requests to reCAPTCHA will fail until authentication steps are complete.
     # See https://cloud.google.com/recaptcha/docs/authentication.
+    if(Sys.getenv("RECAPTCHA_API_KEY") == "") stop('RECAPTCHA_API_KEY not set in .env file. Please see the README for setup instructions.')
+    if(Sys.getenv("PUBLIC_RECAPTCHA_SITE_KEY") == "") stop('PUBLIC_RECAPTCHA_SITE_KEY not set in .env file. Please see the README for setup instructions.')
 
     response = POST(
         url = paste0("https://recaptchaenterprise.googleapis.com/v1/projects/testauth-450202/assessments?key=", Sys.getenv("RECAPTCHA_API_KEY")),

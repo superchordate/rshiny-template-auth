@@ -82,6 +82,7 @@
 
       window.app = initializeApp(config);
       window.auth = getAuth(app);
+      window.invisible_recaptcha = {{ ifelse(auth_methods$invisible_recaptcha, "true", "false") }};
 
       // on some refreshes, Shiny is getting lost. reload if this is the case.
       function delay(milliseconds){
