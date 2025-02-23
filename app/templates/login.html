@@ -1,4 +1,4 @@
-<div id="login_template" class="w-full pt-12 mt-12 flex justify-center"><div class="bg-white p-8 rounded-lg shadow-md w-96">
+<div id="login_template" class="hidden w-full pt-12 mt-12 flex justify-center"><div class="bg-white p-8 rounded-lg shadow-md w-96">
     
     {{if(auth_methods$email) HTML('<h2 class="text-2xl font-bold mb-6 text-center text-gray-800">Login</h2>')}}
     
@@ -122,6 +122,10 @@
         getAuth, RecaptchaVerifier, multiFactor, PhoneAuthProvider, signInWithEmailAndPassword ,
         PhoneMultiFactorGenerator, getMultiFactorResolver, GoogleAuthProvider, signInWithPopup, sendPasswordResetEmail
     } from 'https://www.gstatic.com/firebasejs/11.2.0/firebase-auth.js'
+
+    if(!localStorage.getItem('cookieConsent') || localStorage.getItem('cookieConsent') != 'rejected'){
+        document.getElementById('login_template').classList.remove('hidden');
+    }
 
     if(window.invisible_recaptcha){ window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {'size': 'invisible'}); }
 

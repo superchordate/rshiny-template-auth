@@ -23,4 +23,8 @@ server = function(input, output, session) {
     if(!is.null(authorized()) && authorized()){ 
       htmlTemplate("templates/protected.html") 
   }})
+
+  output$`cookie-consent` = renderUI({
+    htmlTemplate("templates/cookie-consent.html") 
+  })
 }
