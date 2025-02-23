@@ -104,12 +104,13 @@ PUBLIC_FIREBASE_AUTH_DOMAIN=paste_domain_here
 
 * Even though these are public keys, the .env file will be ignored by Git so your keys don't get pushed to GitHub. See more about key security below under heading "On the Web".
 
-If you would like to use two-factor authentication (2FA/MFA) with SMS/text:
+MFA: Ultimately, passwords aren't enough to protect sensitive data<sup>[4](https://techcommunity.microsoft.com/blog/microsoft-entra-blog/your-paword-doesnt-matter/731984)</sup>. It is smart to also require MFA on your accounts. If you would like to use two-factor authentication (2FA/MFA) with SMS/text
 
 * Go to https://console.cloud.google.com/customer-identity/mfa.
 * Click "Enable" 
 * Note the options here. You can customize your SMS here.
 * When you are ready, click "Save". Or, just click it to accept defaults. You can come back to change it later.
+* Go to https://console.cloud.google.com/customer-identity/providers and switch Phone to Enabled.
 
 If you would like to set up reCAPTCHA to prevent some bot activity, follow the steps below. Google requires reCAPTCHA checks before any SMS send, so you must follow these steps if you want to use MFA.
 
@@ -140,7 +141,7 @@ If you would like to set up reCAPTCHA to prevent some bot activity, follow the s
 
 -->
 
-Authorize the local R Shiny development domain.
+Authorize the local R Shiny development domain, or your web domain if publishing to the web.
 
   * Go to https://console.cloud.google.com/customer-identity/settings.
   * Click "SECURITY". 
@@ -168,18 +169,6 @@ This section assumes you are running R Shiny locally.
 * Note the URL. For me it is "http://127.0.0.1:4201/?".
 * The domain is the part in the middle, in this case "127.0.0.1"
 * If on the web, your domain might be something like "https://shinydemo.brycechamberlainllc.com" in which case the domain is "brycechamberlainllc.com".
-
-
-## Multi-Factor Authentication
-
-Ultimately, passwords aren't enough to protect sensitive data<sup>[4](https://techcommunity.microsoft.com/blog/microsoft-entra-blog/your-paword-doesnt-matter/731984)</sup>. It is smart to also require MFA on your accounts.
-
-This template makes it easy to add multi-factor authentication via SMS. MFA will be required for all users who sign into your app, including those that sign in with Google. 
-
-* MFA requires reCAPTCHA, so follow steps for reCAPTCHA Setup above. 
-* Go to https://console.cloud.google.com/customer-identity/mfa and click "ENABLE".
-* Add your phone number under "Phone numbers for testing (optional)"
-* Go to https://console.firebase.google.com/ > Build > Authentication > Settings > SMS region policy > Allow United States > Save. 
 
 
 ## On the Web
