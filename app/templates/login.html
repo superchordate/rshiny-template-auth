@@ -260,6 +260,10 @@
                 .then(function (verificationId) {
                     window.mfa_verificationId = verificationId;
                     mfaCodeShow();
+                })
+                .catch(error => {
+                    console.log(error);
+                    showAlert("error", "Verification failed. Please try again. Error code: " + error.code);
                 });
 
         } else {

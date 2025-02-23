@@ -47,17 +47,24 @@ verify_recaptcha = function(recaptcha_token){
     # See https://cloud.google.com/recaptcha/docs/authentication.
 
     # I'm testing a new method using the Firebase API key. It seems to work but I'm leaving the prior approach here for now.
-    # if(Sys.getenv("RECAPTCHA_API_KEY") == "") stop('RECAPTCHA_API_KEY not set in .env file. Please see the README for setup instructions.')
-    # if(Sys.getenv("PUBLIC_RECAPTCHA_SITE_KEY") == "") stop('PUBLIC_RECAPTCHA_SITE_KEY not set in .env file. Please see the README for setup instructions.')
+    # if(use_recapthca_keys <- FALSE){
+
+    #     if(Sys.getenv("RECAPTCHA_API_KEY") == "") stop('RECAPTCHA_API_KEY not set in .env file. Please see the README for setup instructions.')
+    #     if(Sys.getenv("PUBLIC_RECAPTCHA_SITE_KEY") == "") stop('PUBLIC_RECAPTCHA_SITE_KEY not set in .env file. Please see the README for setup instructions.')
+    #     url = paste0("https://recaptchaenterprise.googleapis.com/v1/projects/testauth-450202/assessments?key=", Sys.getenv("RECAPTCHA_API_KEY"))
+    #     siteKey = Sys.getenv("PUBLIC_RECAPTCHA_SITE_KEY")
+
+    # } else {
+        url = url = paste0("https://recaptchaenterprise.googleapis.com/v1/projects/testauth-450202/assessments?key=", Sys.getenv("PUBLIC_FIREBASE_API_KEY"))
+        siteKey = Sys.getenv("PUBLIC_FIREBASE_API_KEY")
+    # }
 
     response = POST(
-        # url = paste0("https://recaptchaenterprise.googleapis.com/v1/projects/testauth-450202/assessments?key=", Sys.getenv("RECAPTCHA_API_KEY")),
-        url = paste0("https://recaptchaenterprise.googleapis.com/v1/projects/testauth-450202/assessments?key=", Sys.getenv("PUBLIC_FIREBASE_API_KEY")),
+        url = url,
         body = toJSON(list(event = list(
             "token" = recaptcha_token,
             "expectedAction" = "REGISTER",
-            # "siteKey" = Sys.getenv("PUBLIC_RECAPTCHA_SITE_KEY")
-            "siteKey" = Sys.getenv("PUBLIC_FIREBASE_API_KEY")
+            "siteKey" = siteKey
         )), auto_unbox = TRUE),
         encode = "json",
         content_type_json()

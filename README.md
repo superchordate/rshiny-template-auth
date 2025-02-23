@@ -112,6 +112,16 @@ MFA: Ultimately, passwords aren't enough to protect sensitive data<sup>[4](https
 * When you are ready, click "Save". Or, just click it to accept defaults. You can come back to change it later.
 * Go to https://console.cloud.google.com/customer-identity/providers and switch Phone to Enabled.
 
+You also need to enable the region. 
+
+* Go to https://console.firebase.google.com/u/0/
+* Select your project
+* On the left menu, click "Build" and then "Authentication".
+* On the tab menu,click "Settings"
+* Click "SMS region policy" and "Select regions". Select "United States (US)" and "Save".
+
+<!-- These steps pending removal during testing of using the Firebase API key instead of creating separate reCAPTCHA keys.
+
 If you would like to set up reCAPTCHA to prevent some bot activity, follow the steps below. Google requires reCAPTCHA checks before any SMS send, so you must follow these steps if you want to use MFA.
 
 * reCAPTCHA verification is free for up to 10,000 assessments per organization, and super cheap after that.<sup>[2](https://cloud.google.com/security/products/recaptcha?pricing&hl=en#pricing)</sup> You can be alerted if the reCAPTCHA starts getting hit excessively. See [this forum post](https://stackoverflow.com/questions/78450805/monitoring-and-alerts-configuration-for-google-recaptcha-v3-enterprise-edition).
@@ -125,8 +135,6 @@ If you would like to set up reCAPTCHA to prevent some bot activity, follow the s
   - Choose "platform type" = "Website".
   - Click "Add a domain" and enter your R Shiny domain (see "How to Find My R Shiny Dev Domain" below).
 
-<!-- These steps pending removal during testing of using the Firebase API key instead of creating separate reCAPTCHA keys.
-
   - Click "Create key".
   - Note your ID now at the top of the screen. Copy it and add the it to `.env` as `PUBLIC_RECAPTCHA_SITE_KEY`.
 
@@ -136,6 +144,7 @@ If you would like to set up reCAPTCHA to prevent some bot activity, follow the s
   - Set Name = "recaptcha", Restrict Key = reCAPTCHA Enterprise API
   - Click Show key, copy into `.env` as `RECAPTCHA_API_KEY`
   - Click Close and Save
+  - To further secure it, only allow usage from your website: Under "Application restrictions" select "Website", click "+ ADD" and enter your full website "https://www.yoursite.com".
 
 * This may require extra setup when publishing to the web. The server must be authenticated with reCAPTCHA and your google project. I expect this will be automatic if using Google Cloud Run on the same project, but it might be tricky on other publishing platforms. See https://cloud.google.com/recaptcha/docs/authentication for more information.  
 
@@ -168,7 +177,7 @@ This section assumes you are running R Shiny locally.
 * Run the app using RStudio or your preferred method.
 * Note the URL. For me it is "http://127.0.0.1:4201/?".
 * The domain is the part in the middle, in this case "127.0.0.1"
-* If on the web, your domain might be something like "https://shinydemo.brycechamberlainllc.com" in which case the domain is "brycechamberlainllc.com".
+* If on the web, your domain might be something like "https://shinydemo.brycechamberlainllc.com" in which case the domain is "shinydemo.brycechamberlainllc.com".
 
 
 ## On the Web
