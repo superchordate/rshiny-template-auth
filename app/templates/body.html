@@ -109,9 +109,11 @@
                 iuser.getIdToken().then(function (idToken) {
                   Shiny.setInputValue("user_login", [idToken, iuser]);
                 });
+                if(document.getElementById('navbar-userid')){ document.getElementById('navbar-userid').innerText = iuser.email; }
 
             } else {
                 Shiny.setInputValue("user_logout", "logout");
+                if(document.getElementById('navbar-userid')){ document.getElementById('navbar-userid').innerText =""; }
           }})
 
         })
