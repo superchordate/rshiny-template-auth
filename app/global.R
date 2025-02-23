@@ -19,11 +19,11 @@ auth_methods = list(
 
 if(auth_methods$mfa_sms && !auth_methods$invisible_recaptcha) stop('MFA requires invisible recaptcha. Please enable it in the auth_methods list.')
 
-enableBookmarking(store = "url")
-readRenviron('.env')
-
 # check if the app is running locally. helpful for development. 
 islocal = Sys.getenv('SHINY_PORT') == ""
+
+enableBookmarking(store = "url")
+readRenviron(ifelse(islocal, '../.env-dev', '.env'))
 
 # source any files in the app/global/ folder. 
 for(i in list.files('global', pattern = '[.][Rr]', recursive = TRUE, full.names = TRUE)) source(i, local = TRUE)
