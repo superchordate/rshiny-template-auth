@@ -23,7 +23,7 @@ if(auth_methods$mfa_sms && !auth_methods$invisible_recaptcha) stop('MFA requires
 islocal = Sys.getenv('SHINY_PORT') == ""
 
 enableBookmarking(store = "url")
-readRenviron(ifelse(islocal, '../.env-dev', '.env'))
+if(islocal) readRenviron('../.env-dev')
 
 # source any files in the app/global/ folder. 
 for(i in list.files('global', pattern = '[.][Rr]', recursive = TRUE, full.names = TRUE)) source(i, local = TRUE)
