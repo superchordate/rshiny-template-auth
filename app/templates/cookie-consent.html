@@ -38,9 +38,14 @@
   }
 
   function acceptCookies() {
+      const dorefresh = localStorage.getItem('cookieConsent') === 'rejected'
       localStorage.setItem('cookieConsent', 'accepted');
-      document.getElementById('cookie-consent-reject-note').classList.add('hidden');
-      hideCookieConsent();
+      if(dorefresh) {
+        window.location.reload();
+      } else {
+        document.getElementById('cookie-consent-reject-note').classList.add('hidden');
+        hideCookieConsent();
+      }
   }
 
   function rejectCookies() {
