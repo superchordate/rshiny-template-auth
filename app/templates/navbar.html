@@ -1,47 +1,58 @@
 <nav style="background-color: #bc5f6a;">
-    <div class="max-w-7xl mx-auto px-4">
+
+    <!-- desktop tabs -->
+    <div class="hidden md:block max-w-7xl mx-auto px-4">
         <div class="flex items-center justify-between h-16">
-            <div class="hidden md:block">
-                <div class="flex items-center space-x-4">
-                    <a href="#" onclick="setTab('mtcars')" class="nav-link active" data-tab="mtcars">mtcars</a>
-                    <a href="#" onclick="setTab('states')" class="nav-link" data-tab="states">states</a>
-                </div>
-            </div>
             <div class="flex items-center space-x-4">
-                <div class="md:hidden">
-                    <button type="button" onclick="toggleMenu()" class="text-white hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-white">
-                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-                        </svg>
-                    </button>
-                </div>
+                <a href="#" onclick="setTab('mtcars')" class="nav-link active" data-tab="mtcars">mtcars</a>
+                <a href="#" onclick="setTab('states')" class="nav-link" data-tab="states">states</a>
             </div>
         </div>
     </div>
-    <div class="hidden md:hidden" id="mobile-menu">
-        <div class="px-2 pt-2 pb-3 space-y-1">
-            <a href="#" onclick="setTab('mtcars')" class="nav-link active" data-tab="mtcars">mtcars</a>
-            <a href="#" onclick="setTab('states')" class="nav-link" data-tab="states">states</a>
-            <button onclick="logout()" class="block text-white bg-gray-700 px-4 py-2 rounded w-full text-left hover:bg-gray-600">Log Out</button>
-        </div>
-    </div>
-    <div class="absolute right-4 top-0">
-        <div class="text-white flex items-center justify-between space-6 h-16">
+
+    <!-- person icon, user name, log-out -->
+    <div class="md:absolute md:right-4 md:top-0">
+        <div class="text-white flex items-center justify-between md:h-16 px-4 pt-4 md:p-0">
             <div class="mr-4">
                 <!-- https://heroicons.com/ -->
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
                 </svg>
             </div>
-            <p id="navbar-userid" class="text-white mr-4"></p>
-            <a href="#" onclick="logout()">
+
+            <p id="navbar-userid" class="text-white mr-4 truncate"></p>
+
+            <div class="cursor-pointer" onclick="logout()">
                 <!-- https://heroicons.com/ -->
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 9V5.25A2.25 2.25 0 0 1 10.5 3h6a2.25 2.25 0 0 1 2.25 2.25v13.5A2.25 2.25 0 0 1 16.5 21h-6a2.25 2.25 0 0 1-2.25-2.25V15m-3 0-3-3m0 0 3-3m-3 3H15" />
                 </svg>
-            </a>
+            </div>
         </div>
     </div>
+
+    <!-- hamburger menu for mobile -->
+    <div class="md:hidden flex items-center space-x-4 px-4 pt-2 pb-4 md:p-0">
+        <button type="button" onclick="toggleMenu()" class="text-white hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-white">
+            <!-- Hamburger icon -->
+            <svg id="hamburger-icon" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+            <!-- X icon (hidden by default) -->
+            <svg id="close-icon" class="h-6 w-6 hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+            </svg>
+        </button>
+    </div>
+
+    <!-- mobile tabs -->
+    <div class="hidden" id="mobile-menu">
+        <div class="px-2 pt-2 pb-3 space-y-1">
+            <a onclick="setTab('mtcars')" class="nav-link active" data-tab="mtcars">mtcars</a>
+            <a onclick="setTab('states')" class="nav-link" data-tab="states">states</a>
+        </div>
+    </div>
+
 </nav>
 
 <style>
@@ -67,7 +78,14 @@
 <script>
     function toggleMenu() {
         const menu = document.getElementById('mobile-menu');
+        const hamburgerIcon = document.getElementById('hamburger-icon');
+        const closeIcon = document.getElementById('close-icon');
+        
         menu.classList.toggle('hidden');
+        
+        // Toggle between hamburger and X icons
+        hamburgerIcon.classList.toggle('hidden');
+        closeIcon.classList.toggle('hidden');
     }
 
     function setTab(value) {
