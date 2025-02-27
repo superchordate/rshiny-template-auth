@@ -107,7 +107,7 @@ send_confirmation = function(idToken, alert = TRUE){
 }
 
 observeEvent(input$user_logout, {
-    authorized(FALSE)
+    not_authorized()
 })
 
 # anytime we set authorized to FALSE, we also want to clear the login form to allow another attempt.

@@ -112,8 +112,7 @@
                 if(document.getElementById('navbar-userid')){ document.getElementById('navbar-userid').innerText = iuser.email; }
 
             } else {
-                Shiny.setInputValue("user_logout", "logout");
-                if(document.getElementById('navbar-userid')){ document.getElementById('navbar-userid').innerText =""; }
+                Shiny.setInputValue("user_logout", "logout " + (new Date())); // add the timestamp so the message is unique and will trigger the observer.
           }})
 
         })
@@ -129,7 +128,6 @@
       Shiny.addCustomMessageHandler("log_user_out", function(message){ auth.signOut(); })
 
       // reset the view whenever the hash changes to default.
-      // this breaks tab selectors.
       window.onhashchange = () => { 
         if(location.hash === "" && window.loginShow) { loginShow() } 
       }
